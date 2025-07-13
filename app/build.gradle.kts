@@ -1,14 +1,39 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.openapi.generator)
+}
+
+val openApiBuildPath = "${layout.buildDirectory.asFile.get().path}/openapi-generator"
+
+openApiGenerate {
+    generatorName = "kotlin"
+    generateApiDocumentation = true
+    generateModelDocumentation = true
+
+    val secrets = Properties().apply {
+        load(rootProject.file("secrets.properties").reader())
+    }
+    remoteInputSpec = secrets["REST_URI"].toString()
+    outputDir = openApiBuildPath
+}
+
+tasks.withType<KotlinCompile> {
+    dependsOn(tasks.openApiGenerate)
 }
 
 android {
     namespace = "com.vladislaviliev.meet"
     compileSdk = 36
+
+    sourceSets.getByName("main") {
+        java.setSrcDirs(listOf("src/main/java", "$openApiBuildPath/src/main/kotlin"))
+    }
 
     defaultConfig {
         applicationId = "com.vladislaviliev.meet"
@@ -53,8 +78,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.ui.tooling.preview)
 
-    androidTestImplementation(platform(libs.androidx.compose.bom))
+    implementation(libs.okhttp)
+    implementation(libs.moshi)
+
     testImplementation(libs.junit)
+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.test.manifest)
