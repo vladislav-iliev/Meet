@@ -9,7 +9,6 @@ internal class TokenRefresh {
 
     fun refreshTokens(client: OkHttpClient, refreshToken: String, userId: String): Tokens {
         val newAccess = refreshAccess(client, refreshToken, userId)
-        val newExpiration = runCatching { TokenParser().parse(newAccess)["exp"]?.toLong() }.getOrNull() ?: -1L
-        return Tokens(newAccess, refreshToken, newExpiration)
+        return Tokens(newAccess, refreshToken, TokenParser().parseExpiration(newAccess))
     }
 }

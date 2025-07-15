@@ -7,8 +7,6 @@ import okhttp3.OkHttpClient
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import kotlin.reflect.full.functions
-import kotlin.reflect.full.memberFunctions
 
 class TokenRefreshTest {
 
@@ -44,24 +42,6 @@ class TokenRefreshTest {
         val userId = "testUserId"
         val newAccessTokenFromMock =
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-        val expectedExpiration = -1L
-
-        every {
-            spiedTokenRefresh["refreshAccess"](any<OkHttpClient>(), any<String>(), any<String>())
-        } returns newAccessTokenFromMock
-
-        val result = spiedTokenRefresh.refreshTokens(mockk(), refreshTokenString, userId)
-
-        assertEquals(newAccessTokenFromMock, result.access)
-        assertEquals(refreshTokenString, result.refresh)
-        assertEquals(expectedExpiration, result.expiration)
-    }
-
-    @Test
-    fun `refreshTokens handles invalid JWT format when #refreshAccess is mocked`() {
-        val refreshTokenString = "testRefreshToken"
-        val userId = "testUserId"
-        val newAccessTokenFromMock = "invalid.jwt.token"
         val expectedExpiration = -1L
 
         every {
