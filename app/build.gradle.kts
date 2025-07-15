@@ -82,6 +82,8 @@ dependencies {
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.moshi)
 
+    implementation(libs.jackson)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
 
