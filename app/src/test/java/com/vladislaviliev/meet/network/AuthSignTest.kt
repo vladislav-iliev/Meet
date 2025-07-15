@@ -3,9 +3,19 @@ package com.vladislaviliev.meet.network
 import okhttp3.Request
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class AuthSignTest {
+
+    @Test
+    fun `sign doesn't add empty headers`() {
+        val originalRequest =
+            Request.Builder().url("https://example.com").header("Existing-Header", "ExistingValue").build()
+
+        val signedRequest = originalRequest.sign("")
+        assertNull(signedRequest.header(HEADER_AUTH_KEY))
+    }
 
     @Test
     fun `sign adds Authorization header correctly`() {
