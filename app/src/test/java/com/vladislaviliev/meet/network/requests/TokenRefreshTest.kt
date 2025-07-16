@@ -1,4 +1,4 @@
-package com.vladislaviliev.meet.network
+package com.vladislaviliev.meet.network.requests
 
 import io.mockk.every
 import io.mockk.mockk

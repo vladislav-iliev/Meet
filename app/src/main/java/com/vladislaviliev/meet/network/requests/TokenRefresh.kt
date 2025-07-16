@@ -1,5 +1,7 @@
-package com.vladislaviliev.meet.network
+package com.vladislaviliev.meet.network.requests
 
+import com.vladislaviliev.meet.network.TokenParser
+import com.vladislaviliev.meet.network.Tokens
 import okhttp3.OkHttpClient
 import org.openapitools.client.apis.CognitoControllerApi
 
