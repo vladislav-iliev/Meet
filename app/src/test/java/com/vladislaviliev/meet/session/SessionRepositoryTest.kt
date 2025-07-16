@@ -11,11 +11,11 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.koin.dsl.koinApplication
+import org.koin.core.Koin
 
 class SessionRepositoryTest {
 
-    private var koin = koinApplication().koin
+    private var koin = Koin()
 
     private val sessionRepository = SessionRepository(koin)
 
