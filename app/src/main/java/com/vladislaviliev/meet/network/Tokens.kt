@@ -1,9 +1,9 @@
 package com.vladislaviliev.meet.network
 
-internal data class Tokens(val access: String, val refresh: String, val expiration: Long) {
-    val isBlank = access.isNotBlank()
+internal data class Tokens(val userId: String, val access: String, val refresh: String, val expiry: Long) {
+    val isBlank = access.isBlank()
 
     companion object {
-        val BLANK = Tokens("", "", -1)
+        val BLANK = Tokens("", "", "", -1)
     }
 }

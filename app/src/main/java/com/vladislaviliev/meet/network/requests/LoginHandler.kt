@@ -22,7 +22,7 @@ internal class LoginHandler(
             onFinish(Result.failure(expiryParsed.exceptionOrNull()!!))
             return
         }
-        val tokens = Tokens(accessToken, responseValue.refreshToken, expiryParsed.getOrNull()!!)
+        val tokens = Tokens(responseValue.userId, accessToken, responseValue.refreshToken, expiryParsed.getOrNull()!!)
         onFinish(Result.success(tokens))
     }
 }

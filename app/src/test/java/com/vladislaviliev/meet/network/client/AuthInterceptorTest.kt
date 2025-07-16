@@ -26,7 +26,7 @@ class AuthInterceptorTest {
         val requestSlot = slot<Request>()
         every { mockChain.proceed(capture(requestSlot)) } returns mockResponse
 
-        AuthInterceptor(Tokens(testToken, "", 0L)).intercept(mockChain)
+        AuthInterceptor(Tokens("", testToken, "", 0L)).intercept(mockChain)
 
         verify { mockChain.request() }
 

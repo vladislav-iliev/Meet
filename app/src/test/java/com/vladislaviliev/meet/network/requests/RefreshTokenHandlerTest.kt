@@ -44,7 +44,7 @@ class RefreshTokenHandlerTest {
         val tokens = result.getOrNull()!!
         assertEquals(newAccessToken, tokens.access)
         assertEquals(refreshTokenString, tokens.refresh)
-        assertEquals(expectedExpiration, tokens.expiration)
+        assertEquals(expectedExpiration, tokens.expiry)
 
         verify { mockApi.refreshToken(refreshTokenString, userId) }
         verify { mockTokenParser.parseExpiration(newAccessToken) }
@@ -127,7 +127,7 @@ class RefreshTokenHandlerTest {
         val tokens = result.getOrNull()!!
         assertEquals(newAccessTokenWithoutExp, tokens.access)
         assertEquals(refreshTokenString, tokens.refresh)
-        assertEquals(expectedExpirationFromParser, tokens.expiration)
+        assertEquals(expectedExpirationFromParser, tokens.expiry)
 
         verify { mockApi.refreshToken(refreshTokenString, userId) }
         verify { mockTokenParser.parseExpiration(newAccessTokenWithoutExp) }

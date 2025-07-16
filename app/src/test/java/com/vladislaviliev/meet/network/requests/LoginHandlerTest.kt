@@ -42,7 +42,7 @@ class LoginHandlerTest {
         val tokens = result.getOrNull()!!
         assertEquals(accessToken, tokens.access)
         assertEquals(refreshToken, tokens.refresh)
-        assertEquals(expirationTime, tokens.expiration)
+        assertEquals(expirationTime, tokens.expiry)
 
         verify { mockApi.login(username, password) }
         verify { mockTokenParser.parseExpiration(accessToken) }

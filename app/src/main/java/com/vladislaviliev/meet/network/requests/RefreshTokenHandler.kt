@@ -22,7 +22,7 @@ internal class RefreshTokenHandler(
             onFinish(Result.failure(expiryParsed.exceptionOrNull()!!))
             return
         }
-        val tokens = Tokens(newAccessToken, refreshToken, expiryParsed.getOrNull()!!)
+        val tokens = Tokens(userId, newAccessToken, refreshToken, expiryParsed.getOrNull()!!)
         onFinish(Result.success(tokens))
     }
 }
