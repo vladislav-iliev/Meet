@@ -1,16 +1,28 @@
 package com.vladislaviliev.meet.network.requests
 
+import com.vladislaviliev.meet.network.TokenParser
 import com.vladislaviliev.meet.network.Tokens
-import okhttp3.OkHttpClient
+import org.openapitools.client.apis.CognitoControllerApi
 
-internal class LoginHandler {
-    fun login(client: OkHttpClient, username: String, password: String, onFinish: (Tokens) -> Unit): Result<Unit> {
-        val response = runCatching { Login().login(client, username, password) }
+internal class LoginHandler(
+    private val api: CognitoControllerApi,
+    private val parser: TokenParser,
+    private val onFinish: (Result<Tokens>) -> Unit
+) {
+    fun login(username: String, password: String) {
+        val response = runCatching { api.login(username, password) }
         if (response.isFailure) {
-            onFinish(Tokens.BLANK)
-            return Result.failure(response.exceptionOrNull()!!)
+            onFinish(Result.failure(response.exceptionOrNull()!!))
+            return
         }
-        onFinish(response.getOrNull()!!)
-        return Result.success(Unit)
+        val responseValue = response.getOrNull()!!
+        val accessToken = responseValue.accessToken
+        val expiryParsed = runCatching { parser.parseExpiration(accessToken) }
+        if (expiryParsed.isFailure) {
+            onFinish(Result.failure(expiryParsed.exceptionOrNull()!!))
+            return
+        }
+        val tokens = Tokens(accessToken, responseValue.refreshToken, expiryParsed.getOrNull()!!)
+        onFinish(Result.success(tokens))
     }
 }

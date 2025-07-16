@@ -1,71 +1,99 @@
 package com.vladislaviliev.meet.network.requests
 
+import com.vladislaviliev.meet.network.TokenParser
 import com.vladislaviliev.meet.network.Tokens
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkConstructor
 import io.mockk.slot
-import io.mockk.unmockkAll
 import io.mockk.verify
-import okhttp3.OkHttpClient
-import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.openapitools.client.apis.CognitoControllerApi
 import org.openapitools.client.infrastructure.ClientException
+import org.openapitools.client.models.LoginResponseDTO
 
 class LoginHandlerTest {
 
-    private val mockClient = mockk<OkHttpClient>()
-    private val loginHandler = LoginHandler()
-
-    @After
-    fun tearDown() {
-        unmockkAll()
-    }
+    private val mockApi = mockk<CognitoControllerApi>()
+    private val mockTokenParser = mockk<TokenParser>()
 
     @Test
-    fun `login success calls onFinish with new tokens and returns success`() {
+    fun `login success calls onFinish with success Result and correct Tokens`() {
         val username = "testUser"
         val password = "testPassword"
-        val expectedTokens = Tokens("newAccess", "newRefresh", 123L)
+        val accessToken = "testAccessToken"
+        val refreshToken = "testRefreshToken"
+        val expirationTime = 1234567890L
+        val mockLoginResponse = LoginResponseDTO(accessToken, refreshToken, "testUserId")
 
-        val tokensArgumentSlot = slot<Tokens>()
+        every { mockApi.login(username, password) } returns mockLoginResponse
+        every { mockTokenParser.parseExpiration(accessToken) } returns expirationTime
 
-        mockkConstructor(Login::class)
-        every { anyConstructed<Login>().login(mockClient, username, password) } returns expectedTokens
+        val resultSlot = slot<Result<Tokens>>()
+        val loginHandler = LoginHandler(mockApi, mockTokenParser) { result -> resultSlot.captured = result }
 
-        val result = loginHandler.login(mockClient, username, password) { tokens ->
-            tokensArgumentSlot.captured = tokens
-        }
+        loginHandler.login(username, password)
 
+        assertTrue(resultSlot.isCaptured)
+        val result = resultSlot.captured
         assertTrue(result.isSuccess)
-        assertEquals(Unit, result.getOrNull())
+        val tokens = result.getOrNull()
+        assertEquals(accessToken, tokens?.access)
+        assertEquals(refreshToken, tokens?.refresh)
+        assertEquals(expirationTime, tokens?.expiration)
 
-        verify { anyConstructed<Login>().login(mockClient, username, password) }
-
-        assertTrue(tokensArgumentSlot.isCaptured)
-        assertEquals(expectedTokens, tokensArgumentSlot.captured)
+        verify { mockApi.login(username, password) }
+        verify { mockTokenParser.parseExpiration(accessToken) }
     }
 
     @Test
-    fun `login failure calls onFinish with BLANK tokens and returns failure`() {
+    fun `login failure calls onFinish with failure Result`() {
         val username = "testUser"
         val password = "testPassword"
-        val expectedException = ClientException("Client error : 400 ", 400, null)
-        val tokensArgumentSlot = slot<Tokens>()
+        val expectedException = ClientException("Client error", 400, null)
 
-        mockkConstructor(Login::class)
-        every { anyConstructed<Login>().login(mockClient, username, password) } throws expectedException
+        every { mockApi.login(username, password) } throws expectedException
 
-        val result = loginHandler.login(mockClient, username, password) { tokens ->
-            tokensArgumentSlot.captured = tokens
-        }
+        val resultSlot = slot<Result<Tokens>>()
+        val loginHandler = LoginHandler(mockApi, mockTokenParser) { result -> resultSlot.captured = result }
 
+        loginHandler.login(username, password)
+
+        assertTrue(resultSlot.isCaptured)
+        val result = resultSlot.captured
         assertTrue(result.isFailure)
         assertEquals(expectedException, result.exceptionOrNull())
-        verify { anyConstructed<Login>().login(mockClient, username, password) }
-        assertTrue(tokensArgumentSlot.isCaptured)
-        assertEquals(Tokens.BLANK, tokensArgumentSlot.captured)
+        assertNull(result.getOrNull())
+
+        verify { mockApi.login(username, password) }
+    }
+
+    @Test
+    fun `login failure during token parsing calls onFinish with failure Result`() {
+        val username = "testUser"
+        val password = "testPassword"
+        val accessToken = "testAccessToken"
+        val refreshToken = "testRefreshToken"
+        val mockLoginResponse = LoginResponseDTO(accessToken, refreshToken, "testUserId")
+        val expectedException = RuntimeException("Token parsing failed")
+
+        every { mockApi.login(username, password) } returns mockLoginResponse
+        every { mockTokenParser.parseExpiration(accessToken) } throws expectedException
+
+        val resultSlot = slot<Result<Tokens>>()
+        val loginHandler = LoginHandler(mockApi, mockTokenParser) { result -> resultSlot.captured = result }
+
+        loginHandler.login(username, password)
+
+        assertTrue(resultSlot.isCaptured)
+        val result = resultSlot.captured
+        assertTrue(result.isFailure)
+        assertEquals(expectedException, result.exceptionOrNull())
+        assertNull(result.getOrNull())
+
+        verify { mockApi.login(username, password) }
+        verify { mockTokenParser.parseExpiration(accessToken) }
     }
 }
