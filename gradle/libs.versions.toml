@@ -14,6 +14,7 @@ moshi = "1.15.2"
 
 junit = "4.13.2"
 mockk = "1.14.4"
+kotlinx-coroutines-test = "1.10.2"
 
 jackson = "2.19.1"
 
@@ -50,6 +51,7 @@ koin-androidx-compose-navigation = { group = "io.insert-koin", name = "koin-andr
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 
 koin-test = { group = "io.insert-koin", name = "koin-test" }
 koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4" }
