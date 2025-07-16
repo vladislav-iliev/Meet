@@ -84,8 +84,18 @@ dependencies {
 
     implementation(libs.jackson)
 
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.navigation)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.androidx.compose.navigation)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
+
+    testImplementation(libs.koin.test)
+    testImplementation(libs.koin.test.junit4)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.junit)
