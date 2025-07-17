@@ -24,9 +24,6 @@ class SessionScopeTest : KoinTest {
 
     @Before
     fun setUp() {
-        mockkStatic(Log::class)
-        every { Log.d(any(), any()) } returns 0
-
         startKoin { modules(appModule) }
         sessionRepository = get()
     }
@@ -35,7 +32,6 @@ class SessionScopeTest : KoinTest {
     fun tearDown() {
         sessionRepository.endSession()
         stopKoin()
-        unmockkStatic(Log::class)
     }
 
     @Test

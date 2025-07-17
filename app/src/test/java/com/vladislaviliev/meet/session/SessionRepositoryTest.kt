@@ -1,38 +1,20 @@
 package com.vladislaviliev.meet.session
 
 import com.vladislaviliev.meet.network.repositories.LoginRepositoryProvider
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import io.mockk.verify
-import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
 import org.koin.core.Koin
 
 class SessionRepositoryTest {
 
-    private var koin = Koin()
     private val loginRepositoryProvider = mockk<LoginRepositoryProvider>(relaxed = true)
-
-    private val sessionRepository = SessionRepository(koin, loginRepositoryProvider)
-
-    @Before
-    fun setUp() {
-        mockkStatic(android.util.Log::class)
-        every { android.util.Log.d(any(), any()) } returns 0
-    }
-
-    @After
-    fun tearDown() {
-        unmockkStatic(android.util.Log::class)
-    }
+    private val sessionRepository = SessionRepository(Koin(), loginRepositoryProvider)
 
     @Test
     fun `initial state has no active session`() {
@@ -43,7 +25,6 @@ class SessionRepositoryTest {
     @Test
     fun `startSession creates new scope and sets session as active`() {
         sessionRepository.startSession()
-
         assertNotNull(sessionRepository.currentScope)
         assertTrue(sessionRepository.isSessionActive)
     }
@@ -82,7 +63,6 @@ class SessionRepositoryTest {
         sessionRepository.startSession()
         sessionRepository.endSession()
         sessionRepository.endSession()
-
         assertNull(sessionRepository.currentScope)
         assertFalse(sessionRepository.isSessionActive)
     }
