@@ -4,6 +4,7 @@ import com.vladislaviliev.meet.network.TokenParser
 import com.vladislaviliev.meet.network.client.Client
 import com.vladislaviliev.meet.network.repositories.LoginRepository
 import com.vladislaviliev.meet.network.repositories.LoginRepositoryProvider
+import com.vladislaviliev.meet.network.repositories.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.Session
 import com.vladislaviliev.meet.session.SessionRepository
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,11 @@ val appModule = module {
             LoginRepository(get(), get()).also {
                 get<LoginRepositoryProvider>().update(it)
             }
+        }
+        scoped<LoginRepositoryTimer> {
+            LoginRepositoryTimer(
+                get<CoroutineScope>(), get<LoginRepository>(), { System.currentTimeMillis() }, 60_000L
+            )
         }
     }
 }

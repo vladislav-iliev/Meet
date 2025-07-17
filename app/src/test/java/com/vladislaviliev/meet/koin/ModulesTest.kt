@@ -1,5 +1,6 @@
 package com.vladislaviliev.meet.koin
 
+import com.vladislaviliev.meet.network.repositories.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.SessionRepository
 import org.junit.Test
 import org.koin.core.Koin
@@ -14,7 +15,10 @@ class ModulesTest {
     @Test
     fun `verify appModule configuration`() {
         appModule.verify(
-            injections = injectedParameters(definition<SessionRepository>(Koin::class))
+            injections = injectedParameters(
+                definition<SessionRepository>(Koin::class),
+                definition<LoginRepositoryTimer>(Function0::class, Long::class),
+            )
         )
     }
 }
