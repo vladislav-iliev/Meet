@@ -17,7 +17,7 @@ val appModule = module {
     single<CoroutineScope> { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
     single<LoginRepositoryProvider> { LoginRepositoryProvider() }
     single<CognitoControllerApi> {
-        val client = Client(get(), get())
+        val client = Client(get())
         CognitoControllerApi(client = client.instance)
     }
     singleOf(::TokenParser)
