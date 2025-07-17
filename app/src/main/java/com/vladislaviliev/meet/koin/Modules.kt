@@ -15,25 +15,16 @@ import org.koin.dsl.module
 import org.openapitools.client.apis.CognitoControllerApi
 
 val appModule = module {
-    single<CoroutineScope> { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
-    single<LoginRepositoryProvider> { LoginRepositoryProvider() }
-    single<CognitoControllerApi> {
-        val client = Client(get())
-        CognitoControllerApi(client = client.instance)
-    }
+    single { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
+    singleOf(::LoginRepositoryProvider)
+    single { CognitoControllerApi(client = Client(get()).instance) }
     singleOf(::TokenParser)
-    single<SessionRepository> { SessionRepository(getKoin(), get()) }
+    single { SessionRepository(getKoin(), get()) }
 
     scope<Session> {
-        scoped<LoginRepository> {
-            LoginRepository(get(), get()).also {
-                get<LoginRepositoryProvider>().update(it)
-            }
-        }
-        scoped<LoginRepositoryTimer> {
-            LoginRepositoryTimer(
-                get<CoroutineScope>(), get<LoginRepository>(), { System.currentTimeMillis() }, 60_000L
-            )
+        scoped { LoginRepository(get(), get()) }
+        scoped {
+            LoginRepositoryTimer(get(), get(), { System.currentTimeMillis() }, 60_000L)
         }
     }
 }
