@@ -22,7 +22,7 @@ internal class Authenticator(private val loginRepository: () -> LoginRepository?
             return null
         }
 
-        loginRepository.refresh()
+        loginRepository.refreshSync()
         val newTokens = loginRepository.tokens.value
         if (newTokens.isBlank) {
             loginRepository.clear()

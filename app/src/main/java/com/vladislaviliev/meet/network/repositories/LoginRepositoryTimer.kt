@@ -35,7 +35,7 @@ internal class LoginRepositoryTimer(
 
         refreshJob = scope.launch {
             delay(delay)
-            repository.refresh()
+            repository.refreshSync()
         }
     }
 }

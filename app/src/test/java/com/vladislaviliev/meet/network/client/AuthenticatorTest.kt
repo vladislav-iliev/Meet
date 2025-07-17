@@ -37,7 +37,7 @@ class AuthenticatorTest {
         val refreshedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
 
         every { mockLoginRepository.tokens } returns tokensFlow
-        every { mockLoginRepository.refresh() } coAnswers { tokensFlow.value = refreshedTokens }
+        every { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = refreshedTokens }
 
         val firstResponse = mockk<Response>()
         every { firstResponse.priorResponse } returns null
@@ -45,7 +45,7 @@ class AuthenticatorTest {
 
         val result = authenticator.authenticate(null, firstResponse)
 
-        verify(exactly = 1) { mockLoginRepository.refresh() }
+        verify(exactly = 1) { mockLoginRepository.refreshSync() }
         verify(exactly = 0) { mockLoginRepository.clear() }
 
         assertNotNull(result)
@@ -58,7 +58,7 @@ class AuthenticatorTest {
             MutableStateFlow(Tokens(TEST_USER_ID, TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME))
 
         every { mockLoginRepository.tokens } returns tokensFlow
-        every { mockLoginRepository.refresh() } coAnswers { tokensFlow.value = Tokens.BLANK }
+        every { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = Tokens.BLANK }
 
         val firstResponse = mockk<Response>()
         every { firstResponse.priorResponse } returns null
@@ -66,7 +66,7 @@ class AuthenticatorTest {
 
         val result = authenticator.authenticate(null, firstResponse)
 
-        verify(exactly = 1) { mockLoginRepository.refresh() }
+        verify(exactly = 1) { mockLoginRepository.refreshSync() }
         verify(exactly = 1) { mockLoginRepository.clear() }
         assertNull(result)
     }
@@ -85,7 +85,7 @@ class AuthenticatorTest {
         val result = authenticator.authenticate(null, second401Response)
 
         verify(exactly = 1) { mockLoginRepository.clear() }
-        verify(exactly = 0) { mockLoginRepository.refresh() }
+        verify(exactly = 0) { mockLoginRepository.refreshSync() }
         assertNull(result)
     }
 
@@ -96,7 +96,7 @@ class AuthenticatorTest {
         val refreshedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
 
         every { mockLoginRepository.tokens } returns tokensFlow
-        every { mockLoginRepository.refresh() } coAnswers { tokensFlow.value = refreshedTokens }
+        every { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = refreshedTokens }
 
         val priorNon401Response = mockk<Response>()
         val current401Response = mockk<Response>()
@@ -110,7 +110,7 @@ class AuthenticatorTest {
 
         val result = authenticator.authenticate(null, current401Response)
 
-        verify(exactly = 1) { mockLoginRepository.refresh() }
+        verify(exactly = 1) { mockLoginRepository.refreshSync() }
         verify(exactly = 0) { mockLoginRepository.clear() }
         assertNotNull(result)
         assertEquals(String.format(HEADER_AUTH_VALUE, NEW_ACCESS_TOKEN), result!!.header(HEADER_AUTH_KEY))

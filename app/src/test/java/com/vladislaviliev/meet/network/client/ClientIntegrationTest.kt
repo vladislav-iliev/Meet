@@ -29,7 +29,7 @@ class ClientIntegrationTest {
 
     private fun createMockLoginRepository(tokens: Tokens) = mockk<LoginRepository> {
         every { this@mockk.tokens.value } returns tokens
-        every { refresh() } just Runs
+        every { refreshSync() } just Runs
         every { clear() } just Runs
     }
 
@@ -104,7 +104,7 @@ class ClientIntegrationTest {
 
         assertNotNull(authenticatedRequest1)
         assertEquals("Bearer initial_access_token", authenticatedRequest1.header("Authorization"))
-        verify { initialRepository.refresh() }
+        verify { initialRepository.refreshSync() }
 
         // Update to new repository with different tokens
         loginRepositoryProvider.update(updatedRepository)
@@ -112,7 +112,7 @@ class ClientIntegrationTest {
 
         assertNotNull(authenticatedRequest2)
         assertEquals("Bearer updated_access_token", authenticatedRequest2.header("Authorization"))
-        verify { updatedRepository.refresh() }
+        verify { updatedRepository.refreshSync() }
     }
 
     @Test
@@ -167,7 +167,7 @@ class ClientIntegrationTest {
         val tokens = Tokens("user1", "token", "refresh", futureExpiry)
         val mockRepository = createMockLoginRepository(tokens)
 
-        every { mockRepository.refresh() } just Runs
+        every { mockRepository.refreshSync() } just Runs
         every { mockRepository.clear() } just Runs
 
         loginRepositoryProvider.update(mockRepository)

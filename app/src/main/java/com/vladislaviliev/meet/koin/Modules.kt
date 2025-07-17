@@ -22,7 +22,10 @@ val appModule = module {
     single { SessionRepository(getKoin(), get()) }
 
     scope<Session> {
-        scoped { LoginRepository(get(), get()).also { get<LoginRepositoryProvider>().update(it) } }
+        scoped {
+            LoginRepository(get(), Dispatchers.IO, get(), get())
+                .also { get<LoginRepositoryProvider>().update(it) }
+        }
         scoped {
             LoginRepositoryTimer(get(), get(), { System.currentTimeMillis() }, 60_000L)
         }

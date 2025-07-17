@@ -21,7 +21,7 @@ class LoginRepositoryTimerTest {
         val tokensFlow = MutableStateFlow(Tokens.BLANK)
         val repository = mockk<LoginRepository> {
             every { tokens } returns tokensFlow
-            every { refresh() } just Runs
+            every { refreshSync() } just Runs
         }
 
         val eagerness = 500L
@@ -35,7 +35,7 @@ class LoginRepositoryTimerTest {
         advanceTimeBy(advanceTimeBy)
         runCurrent()
 
-        verify(exactly = 1) { repository.refresh() }
+        verify(exactly = 1) { repository.refreshSync() }
     }
 
     @Test
@@ -43,7 +43,7 @@ class LoginRepositoryTimerTest {
         val tokensFlow = MutableStateFlow(Tokens.BLANK)
         val repository = mockk<LoginRepository> {
             every { tokens } returns tokensFlow
-            every { refresh() } just Runs
+            every { refreshSync() } just Runs
         }
 
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 0L }
@@ -52,7 +52,7 @@ class LoginRepositoryTimerTest {
         advanceTimeBy(1000L)
         runCurrent()
 
-        verify(exactly = 0) { repository.refresh() }
+        verify(exactly = 0) { repository.refreshSync() }
     }
 
     @Test
@@ -60,7 +60,7 @@ class LoginRepositoryTimerTest {
         val tokensFlow = MutableStateFlow(Tokens.BLANK)
         val repository = mockk<LoginRepository> {
             every { tokens } returns tokensFlow
-            every { refresh() } just Runs
+            every { refreshSync() } just Runs
         }
 
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 500L }
@@ -70,7 +70,7 @@ class LoginRepositoryTimerTest {
         advanceTimeBy(1000L)
         runCurrent()
 
-        verify(exactly = 1) { repository.refresh() }
+        verify(exactly = 1) { repository.refreshSync() }
     }
 
     @Test
@@ -78,7 +78,7 @@ class LoginRepositoryTimerTest {
         val tokensFlow = MutableStateFlow(Tokens.BLANK)
         val repository = mockk<LoginRepository> {
             every { tokens } returns tokensFlow
-            every { refresh() } just Runs
+            every { refreshSync() } just Runs
         }
 
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 600L }
@@ -88,7 +88,7 @@ class LoginRepositoryTimerTest {
         advanceTimeBy(1000L)
         runCurrent()
 
-        verify(exactly = 0) { repository.refresh() }
+        verify(exactly = 0) { repository.refreshSync() }
     }
 
     @Test
@@ -96,7 +96,7 @@ class LoginRepositoryTimerTest {
         val tokensFlow = MutableStateFlow(Tokens.BLANK)
         val repository = mockk<LoginRepository> {
             every { tokens } returns tokensFlow
-            every { refresh() } just Runs
+            every { refreshSync() } just Runs
         }
 
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returnsMany listOf(0L, 1000L, 2000L) }
@@ -111,12 +111,12 @@ class LoginRepositoryTimerTest {
         advanceTimeBy(1000L) // Complete the time that would have triggered first refresh
         runCurrent()
 
-        verify(exactly = 0) { repository.refresh() }
+        verify(exactly = 0) { repository.refreshSync() }
 
         advanceTimeBy(500L) // Advance to trigger the second refresh
         runCurrent()
 
-        verify(exactly = 1) { repository.refresh() }
+        verify(exactly = 1) { repository.refreshSync() }
     }
 
     @Test
@@ -124,7 +124,7 @@ class LoginRepositoryTimerTest {
         val tokensFlow = MutableStateFlow(Tokens.BLANK)
         val repository = mockk<LoginRepository> {
             every { tokens } returns tokensFlow
-            every { refresh() } just Runs
+            every { refreshSync() } just Runs
         }
 
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 0L }
@@ -138,7 +138,7 @@ class LoginRepositoryTimerTest {
         advanceTimeBy(2000L) // Advance past the original refresh time
         runCurrent()
 
-        verify(exactly = 0) { repository.refresh() }
+        verify(exactly = 0) { repository.refreshSync() }
     }
 
     @Test
@@ -146,7 +146,7 @@ class LoginRepositoryTimerTest {
         val tokensFlow = MutableStateFlow(Tokens.BLANK)
         val repository = mockk<LoginRepository> {
             every { tokens } returns tokensFlow
-            every { refresh() } just Runs
+            every { refreshSync() } just Runs
         }
 
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 0L }
@@ -157,7 +157,7 @@ class LoginRepositoryTimerTest {
         advanceTimeBy(1499L) // Advance time but not enough to trigger refresh
         runCurrent()
 
-        verify(exactly = 0) { repository.refresh() }
+        verify(exactly = 0) { repository.refreshSync() }
     }
 
     @Test
@@ -165,7 +165,7 @@ class LoginRepositoryTimerTest {
         val tokensFlow = MutableStateFlow(Tokens.BLANK)
         val repository = mockk<LoginRepository> {
             every { tokens } returns tokensFlow
-            every { refresh() } just Runs
+            every { refreshSync() } just Runs
         }
 
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returnsMany listOf(0L, 500, 1500L) }
@@ -175,12 +175,12 @@ class LoginRepositoryTimerTest {
         advanceTimeBy(500L)
         runCurrent()
 
-        verify(exactly = 1) { repository.refresh() }
+        verify(exactly = 1) { repository.refreshSync() }
 
         tokensFlow.value = Tokens("userId2", "accessToken2", "refreshToken2", 2000L)
         advanceTimeBy(1000L)
         runCurrent()
 
-        verify(exactly = 2) { repository.refresh() }
+        verify(exactly = 2) { repository.refreshSync() }
     }
 }
