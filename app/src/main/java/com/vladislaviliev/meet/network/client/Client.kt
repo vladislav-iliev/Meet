@@ -22,7 +22,7 @@ internal class Client(
 
     val instance: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
-        .addInterceptor(AuthInterceptor({ repo }))
+        .addInterceptor(AuthInterceptor { repo })
         .authenticator(Authenticator({ repo }, onDisconnect))
         .build()
 }
