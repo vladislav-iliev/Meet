@@ -25,7 +25,7 @@ val appModule = module {
 
     scope<Session> {
         scoped<LoginRepository> {
-            LoginRepository(get<CoroutineScope>(), Dispatchers.IO, get(), get()).also {
+            LoginRepository(get(), get()).also {
                 get<LoginRepositoryProvider>().update(it)
             }
         }

@@ -2,23 +2,18 @@ package com.vladislaviliev.meet.network.repositories
 
 import com.vladislaviliev.meet.network.TokenParser
 import com.vladislaviliev.meet.network.Tokens
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import org.openapitools.client.apis.CognitoControllerApi
 
 internal class LoginRepository(
-    private val scope: CoroutineScope,
-    private val dispatcher: CoroutineDispatcher,
     private val api: CognitoControllerApi,
     private val parser: TokenParser
 ) {
     private val _tokens = MutableStateFlow(Tokens.BLANK)
     val tokens = _tokens.asStateFlow()
 
-    private fun loginSync(username: String, password: String) {
+    fun login(username: String, password: String) {
         val response = runCatching { api.login(username, password) }
         if (response.isFailure) {
             _tokens.value = Tokens.BLANK
@@ -37,7 +32,10 @@ internal class LoginRepository(
         _tokens.value = tokens
     }
 
-    private fun refreshSync(refreshToken: String, userId: String) {
+    fun refresh() {
+        val refreshToken = tokens.value.refresh
+        val userId = tokens.value.userId
+
         val response = runCatching { api.refreshToken(refreshToken, userId) }
         if (response.isFailure) {
             _tokens.value = Tokens.BLANK
@@ -56,25 +54,7 @@ internal class LoginRepository(
         _tokens.value = tokens
     }
 
-    fun login(username: String, password: String) {
-        scope.launch(dispatcher) {
-            loginSync(username, password)
-        }
-    }
-
-    fun refresh() {
-        scope.launch(dispatcher) {
-            refreshSync(tokens.value.refresh, tokens.value.userId)
-        }
-    }
-
-    fun refreshSync() {
-        refreshSync(tokens.value.refresh, tokens.value.userId)
-    }
-
     fun clear() {
-        scope.launch(dispatcher) {
-            _tokens.value = Tokens.BLANK
-        }
+        _tokens.value = Tokens.BLANK
     }
 }

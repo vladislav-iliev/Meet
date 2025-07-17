@@ -4,8 +4,6 @@ import com.vladislaviliev.meet.network.HEADER_AUTH_KEY
 import com.vladislaviliev.meet.network.HEADER_AUTH_VALUE
 import com.vladislaviliev.meet.network.Tokens
 import com.vladislaviliev.meet.network.repositories.LoginRepository
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -39,7 +37,7 @@ class AuthenticatorTest {
         val refreshedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
 
         every { mockLoginRepository.tokens } returns tokensFlow
-        coEvery { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = refreshedTokens }
+        every { mockLoginRepository.refresh() } coAnswers { tokensFlow.value = refreshedTokens }
 
         val firstResponse = mockk<Response>()
         every { firstResponse.priorResponse } returns null
@@ -47,7 +45,7 @@ class AuthenticatorTest {
 
         val result = authenticator.authenticate(null, firstResponse)
 
-        coVerify(exactly = 1) { mockLoginRepository.refreshSync() }
+        verify(exactly = 1) { mockLoginRepository.refresh() }
         verify(exactly = 0) { mockLoginRepository.clear() }
 
         assertNotNull(result)
@@ -60,7 +58,7 @@ class AuthenticatorTest {
             MutableStateFlow(Tokens(TEST_USER_ID, TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME))
 
         every { mockLoginRepository.tokens } returns tokensFlow
-        coEvery { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = Tokens.BLANK }
+        every { mockLoginRepository.refresh() } coAnswers { tokensFlow.value = Tokens.BLANK }
 
         val firstResponse = mockk<Response>()
         every { firstResponse.priorResponse } returns null
@@ -68,7 +66,7 @@ class AuthenticatorTest {
 
         val result = authenticator.authenticate(null, firstResponse)
 
-        coVerify(exactly = 1) { mockLoginRepository.refreshSync() }
+        verify(exactly = 1) { mockLoginRepository.refresh() }
         verify(exactly = 1) { mockLoginRepository.clear() }
         assertNull(result)
     }
@@ -87,7 +85,7 @@ class AuthenticatorTest {
         val result = authenticator.authenticate(null, second401Response)
 
         verify(exactly = 1) { mockLoginRepository.clear() }
-        coVerify(exactly = 0) { mockLoginRepository.refreshSync() }
+        verify(exactly = 0) { mockLoginRepository.refresh() }
         assertNull(result)
     }
 
@@ -98,7 +96,7 @@ class AuthenticatorTest {
         val refreshedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
 
         every { mockLoginRepository.tokens } returns tokensFlow
-        coEvery { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = refreshedTokens }
+        every { mockLoginRepository.refresh() } coAnswers { tokensFlow.value = refreshedTokens }
 
         val priorNon401Response = mockk<Response>()
         val current401Response = mockk<Response>()
@@ -112,7 +110,7 @@ class AuthenticatorTest {
 
         val result = authenticator.authenticate(null, current401Response)
 
-        coVerify(exactly = 1) { mockLoginRepository.refreshSync() }
+        verify(exactly = 1) { mockLoginRepository.refresh() }
         verify(exactly = 0) { mockLoginRepository.clear() }
         assertNotNull(result)
         assertEquals(String.format(HEADER_AUTH_VALUE, NEW_ACCESS_TOKEN), result!!.header(HEADER_AUTH_KEY))
