@@ -1,11 +1,7 @@
 package com.vladislaviliev.meet.koin
 
-import android.util.Log
 import com.vladislaviliev.meet.network.repositories.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.SessionRepository
-import io.mockk.every
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import junit.framework.TestCase.assertFalse
 import org.junit.After
 import org.junit.Before
