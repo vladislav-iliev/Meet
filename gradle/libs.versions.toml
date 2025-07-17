@@ -20,6 +20,10 @@ jackson = "2.19.1"
 
 koin-bom = "4.1.0"
 
+paging-runtime = "3.3.6"
+paging-compose = "3.3.6"
+paging-testing = "3.3.6"
+
 androidx-junit = "1.2.1"
 
 openapi-generator = "7.14.0"
@@ -48,6 +52,10 @@ koin-android = { group = "io.insert-koin", name = "koin-android" }
 koin-androidx-navigation = { group = "io.insert-koin", name = "koin-androidx-navigation" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
 koin-androidx-compose-navigation = { group = "io.insert-koin", name = "koin-androidx-compose-navigation" }
+
+paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging-runtime" }
+paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging-compose" }
+paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "paging-testing" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }

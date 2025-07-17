@@ -91,12 +91,17 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
 
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
 
     testImplementation(libs.koin.test)
     testImplementation(libs.koin.test.junit4)
+
+    testImplementation(libs.paging.testing)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.junit)
