@@ -10,20 +10,22 @@ import com.vladislaviliev.meet.session.SessionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import okhttp3.Call
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.binds
 import org.koin.dsl.module
 import org.openapitools.client.apis.CognitoControllerApi
 
 val appModule = module {
     single { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
     singleOf(::LoginRepositoryProvider)
-    single { CognitoControllerApi(client = Client(get()).instance) }
+    single<Call.Factory> { Client(get()).instance }
     singleOf(::TokenParser)
     single { SessionRepository(getKoin(), get()) }
 
     scope<Session> {
         scoped {
-            LoginRepository(get(), Dispatchers.IO, get(), get())
+            LoginRepository(get(), Dispatchers.IO, CognitoControllerApi(client = get()), get())
                 .also { get<LoginRepositoryProvider>().update(it) }
         }
         scoped {

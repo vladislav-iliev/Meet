@@ -10,6 +10,7 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.test.verify.definition
 import org.koin.test.verify.injectedParameters
 import org.koin.test.verify.verify
+import org.openapitools.client.apis.CognitoControllerApi
 
 @OptIn(KoinExperimentalAPI::class)
 class ModulesTest {
@@ -19,7 +20,7 @@ class ModulesTest {
         appModule.verify(
             injections = injectedParameters(
                 definition<SessionRepository>(Koin::class),
-                definition<LoginRepository>(CoroutineDispatcher::class),
+                definition<LoginRepository>(CoroutineDispatcher::class, CognitoControllerApi::class),
                 definition<LoginRepositoryTimer>(Function0::class, Long::class),
             )
         )
