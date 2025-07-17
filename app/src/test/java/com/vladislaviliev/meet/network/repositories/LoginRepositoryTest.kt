@@ -179,6 +179,80 @@ class LoginRepositoryTest {
     }
 
     @Test
+    fun `refreshSync success updates tokens and completes synchronously`() = runTest {
+        val repository = createRepository()
+
+        performInitialLogin(repository)
+
+        val mockRefreshResponse = RefreshTokenResponseDTO("idToken", NEW_ACCESS_TOKEN)
+        coEvery { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) } returns mockRefreshResponse
+        every { mockTokenParser.parseExpiration(NEW_ACCESS_TOKEN) } returns NEW_EXPIRATION_TIME
+
+        repository.refreshSync()
+
+        val expectedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, NEW_EXPIRATION_TIME)
+        assertEquals(expectedTokens, repository.tokens.value)
+
+        coVerify { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) }
+        verify { mockTokenParser.parseExpiration(NEW_ACCESS_TOKEN) }
+    }
+
+    @Test
+    fun `refreshSync with blank tokens tries to refresh with blank values`() = runTest {
+        val repository = createRepository()
+
+        assertEquals(Tokens.BLANK, repository.tokens.value)
+
+        coEvery { mockApi.refreshToken(Tokens.BLANK.refresh, Tokens.BLANK.userId) } throws
+                ClientException("Invalid token", 400, null)
+
+        repository.refreshSync()
+
+        assertEquals(Tokens.BLANK, repository.tokens.value)
+
+        coVerify { mockApi.refreshToken(Tokens.BLANK.refresh, Tokens.BLANK.userId) }
+        verify(exactly = 0) { mockTokenParser.parseExpiration(any()) }
+    }
+
+    @Test
+    fun `refreshSync failure on API call emits blank tokens`() = runTest {
+        val repository = createRepository()
+
+        performInitialLogin(repository)
+        clearMocks(mockTokenParser, answers = false)
+
+        val expectedException = ClientException("API error", 500, null)
+        coEvery { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) } throws expectedException
+
+        repository.refreshSync()
+
+        assertEquals(Tokens.BLANK, repository.tokens.value)
+
+        coVerify { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) }
+        verify(exactly = 0) { mockTokenParser.parseExpiration(any()) }
+    }
+
+    @Test
+    fun `refreshSync failure on token parsing emits blank tokens`() = runTest {
+        val repository = createRepository()
+
+        performInitialLogin(repository)
+
+        val mockRefreshResponse = RefreshTokenResponseDTO("idToken", NEW_ACCESS_TOKEN)
+        val expectedException = RuntimeException("Token parsing failed")
+
+        coEvery { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) } returns mockRefreshResponse
+        every { mockTokenParser.parseExpiration(NEW_ACCESS_TOKEN) } throws expectedException
+
+        repository.refreshSync()
+
+        assertEquals(Tokens.BLANK, repository.tokens.value)
+
+        coVerify { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) }
+        verify { mockTokenParser.parseExpiration(NEW_ACCESS_TOKEN) }
+    }
+
+    @Test
     fun `logout emits blank tokens to StateFlow`() = runTest {
         val repository = createRepository()
 

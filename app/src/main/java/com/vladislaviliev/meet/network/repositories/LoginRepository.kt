@@ -68,6 +68,10 @@ internal class LoginRepository(
         }
     }
 
+    suspend fun refreshSync() = scope.launch(dispatcher) {
+        doRefresh(tokens.value.refresh, tokens.value.userId)
+    }.join()
+
     fun logout() {
         scope.launch(dispatcher) {
             _tokens.emit(Tokens.BLANK)
