@@ -5,7 +5,6 @@ import com.vladislaviliev.meet.network.Tokens
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.openapitools.client.apis.CognitoControllerApi
@@ -17,7 +16,7 @@ internal class LoginRepository(
     private val parser: TokenParser
 ) {
     private val _tokens = MutableStateFlow(Tokens.BLANK)
-    val tokens: StateFlow<Tokens> = _tokens.asStateFlow()
+    val tokens = _tokens.asStateFlow()
 
     private suspend fun doLogin(username: String, password: String) {
         val response = runCatching { api.login(username, password) }
