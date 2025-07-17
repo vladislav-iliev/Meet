@@ -8,11 +8,7 @@ import kotlinx.coroutines.flow.onEach
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
-internal class Client(
-    scope: CoroutineScope,
-    loginRepositoryProvider: LoginRepositoryProvider,
-    onDisconnect: () -> Unit
-) {
+internal class Client(scope: CoroutineScope, loginRepositoryProvider: LoginRepositoryProvider) {
 
     init {
         loginRepositoryProvider.current.onEach { repo = it }.launchIn(scope)
@@ -23,6 +19,6 @@ internal class Client(
     val instance: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
         .addInterceptor(AuthInterceptor { repo })
-        .authenticator(Authenticator({ repo }, onDisconnect))
+        .authenticator(Authenticator { repo })
         .build()
 }

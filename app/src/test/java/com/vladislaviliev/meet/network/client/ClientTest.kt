@@ -18,10 +18,9 @@ class ClientTest {
     private val mockLoginRepositoryProvider = mockk<LoginRepositoryProvider>().also {
         every { it.current } returns MutableStateFlow(mockLoginRepository)
     }
-    private val mockOnDisconnect = mockk<() -> Unit>()
     private val testScope = TestScope()
 
-    private val okHttpClient = Client(testScope, mockLoginRepositoryProvider, mockOnDisconnect).instance
+    private val okHttpClient = Client(testScope, mockLoginRepositoryProvider).instance
 
     @Test
     fun `Client instance creates OkHttpClient with HttpLoggingInterceptor`() {
