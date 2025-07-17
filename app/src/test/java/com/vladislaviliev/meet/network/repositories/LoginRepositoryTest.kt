@@ -253,7 +253,7 @@ class LoginRepositoryTest {
     }
 
     @Test
-    fun `logout emits blank tokens to StateFlow`() = runTest {
+    fun `clear emits blank tokens to StateFlow`() = runTest {
         val repository = createRepository()
 
         performInitialLogin(repository)
@@ -261,7 +261,7 @@ class LoginRepositoryTest {
         val expectedTokens = Tokens(TEST_USER_ID, TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
         assertEquals(expectedTokens, repository.tokens.value)
 
-        repository.logout()
+        repository.clear()
         advanceUntilIdle()
 
         assertEquals(Tokens.BLANK, repository.tokens.value)

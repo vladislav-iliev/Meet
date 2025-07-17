@@ -72,7 +72,7 @@ internal class LoginRepository(
         refreshSync(tokens.value.refresh, tokens.value.userId)
     }
 
-    fun logout() {
+    fun clear() {
         scope.launch(dispatcher) {
             _tokens.value = Tokens.BLANK
         }
