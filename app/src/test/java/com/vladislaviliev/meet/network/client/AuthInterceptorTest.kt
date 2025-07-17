@@ -18,8 +18,8 @@ import kotlin.test.assertNull
 
 class AuthInterceptorTest {
 
-    private val mockLoginRepository = mockk<LoginRepository>(relaxed = true)
-    private val authInterceptor = AuthInterceptor(mockLoginRepository)
+    private val mockLoginRepository = mockk<LoginRepository>()
+    private val authInterceptor = AuthInterceptor { mockLoginRepository }
 
     private companion object {
         const val TEST_USER_ID = "testUserId"
@@ -63,6 +63,26 @@ class AuthInterceptorTest {
         every { mockChain.proceed(capture(requestSlot)) } returns mockResponse
 
         authInterceptor.intercept(mockChain)
+
+        verify { mockChain.request() }
+        verify(exactly = 1) { mockChain.proceed(any()) }
+
+        val interceptedRequest = requestSlot.captured
+        assertNull(interceptedRequest.header(HEADER_AUTH_KEY))
+    }
+
+    @Test
+    fun `intercept doesn't add auth header when repository is null`() {
+        val authInterceptorWithNullRepo = AuthInterceptor { null }
+
+        val mockChain = mockk<Interceptor.Chain>()
+        every { mockChain.request() } returns Request.Builder().url("https://example.com").build()
+
+        val mockResponse = mockk<Response>()
+        val requestSlot = slot<Request>()
+        every { mockChain.proceed(capture(requestSlot)) } returns mockResponse
+
+        authInterceptorWithNullRepo.intercept(mockChain)
 
         verify { mockChain.request() }
         verify(exactly = 1) { mockChain.proceed(any()) }

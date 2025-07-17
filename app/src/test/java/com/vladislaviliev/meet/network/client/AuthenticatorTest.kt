@@ -19,9 +19,9 @@ import org.junit.Test
 
 class AuthenticatorTest {
 
-    private val mockLoginRepository = mockk<LoginRepository>(relaxed = true)
+    private val mockLoginRepository = mockk<LoginRepository>()
     private val mockOnQuit = mockk<() -> Unit>(relaxed = true)
-    private val authenticator = Authenticator(mockLoginRepository, mockOnQuit)
+    private val authenticator = Authenticator({ mockLoginRepository }, mockOnQuit)
 
     private val baseRequest = Request.Builder().url("https://example.com").build()
 
@@ -117,5 +117,19 @@ class AuthenticatorTest {
         verify(exactly = 0) { mockOnQuit.invoke() }
         assertNotNull(result)
         assertEquals(String.format(HEADER_AUTH_VALUE, NEW_ACCESS_TOKEN), result!!.header(HEADER_AUTH_KEY))
+    }
+
+    @Test
+    fun `authenticate when repository is null should return null`() {
+        val authenticatorWithNullRepo = Authenticator({ null }, mockOnQuit)
+
+        val response = mockk<Response>()
+        every { response.priorResponse } returns null
+        every { response.request } returns baseRequest
+
+        val result = authenticatorWithNullRepo.authenticate(null, response)
+
+        assertNull(result)
+        verify(exactly = 0) { mockOnQuit.invoke() }
     }
 }

@@ -1,7 +1,11 @@
 package com.vladislaviliev.meet.network.client
 
 import com.vladislaviliev.meet.network.repositories.LoginRepository
+import com.vladislaviliev.meet.network.repositories.LoginRepositoryProvider
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import okhttp3.logging.HttpLoggingInterceptor
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -11,8 +15,13 @@ import org.junit.Test
 class ClientTest {
 
     private val mockLoginRepository = mockk<LoginRepository>()
+    private val mockLoginRepositoryProvider = mockk<LoginRepositoryProvider>().also {
+        every { it.current } returns MutableStateFlow(mockLoginRepository)
+    }
     private val mockOnDisconnect = mockk<() -> Unit>()
-    private val okHttpClient = Client(mockLoginRepository, mockOnDisconnect).instance
+    private val testScope = TestScope()
+
+    private val okHttpClient = Client(testScope, mockLoginRepositoryProvider, mockOnDisconnect).instance
 
     @Test
     fun `Client instance creates OkHttpClient with HttpLoggingInterceptor`() {
