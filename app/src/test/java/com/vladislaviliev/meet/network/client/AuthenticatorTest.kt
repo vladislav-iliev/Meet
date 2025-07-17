@@ -2,58 +2,80 @@ package com.vladislaviliev.meet.network.client
 
 import com.vladislaviliev.meet.network.HEADER_AUTH_KEY
 import com.vladislaviliev.meet.network.HEADER_AUTH_VALUE
+import com.vladislaviliev.meet.network.Tokens
+import com.vladislaviliev.meet.network.repositories.LoginRepository
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
+import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.Test
 
 class AuthenticatorTest {
 
-    private val mockRenewToken: () -> String = mockk(relaxed = true)
-    private val mockOnQuit: () -> Unit = mockk(relaxed = true)
-    private val authenticator: Authenticator = Authenticator(mockRenewToken, mockOnQuit)
+    private val mockLoginRepository = mockk<LoginRepository>(relaxed = true)
+    private val mockOnQuit = mockk<() -> Unit>(relaxed = true)
+    private val authenticator = Authenticator(mockLoginRepository, mockOnQuit)
 
     private val baseRequest = Request.Builder().url("https://example.com").build()
 
-    @Test
-    fun `authenticate when first response is 401 and token renewed successfully should return new request`() {
-        val newToken = "new_auth_token"
-
-        val firstResponse = mockk<Response>()
-        every { firstResponse.priorResponse } returns null
-        every { firstResponse.request } returns baseRequest
-        every { mockRenewToken.invoke() } returns newToken
-
-        val result = authenticator.authenticate(null, firstResponse)
-
-        verify(exactly = 1) { mockRenewToken.invoke() }
-        verify(exactly = 0) { mockOnQuit.invoke() }
-
-        assertNotNull(result)
-        assertEquals(String.format(HEADER_AUTH_VALUE, newToken), result!!.header(HEADER_AUTH_KEY))
+    private companion object {
+        const val TEST_USER_ID = "testUserId"
+        const val TEST_ACCESS_TOKEN = "testAccessToken"
+        const val TEST_REFRESH_TOKEN = "testRefreshToken"
+        const val TEST_EXPIRATION_TIME = 1234567890L
+        const val NEW_ACCESS_TOKEN = "newAccessToken"
     }
 
     @Test
-    fun `authenticate when first response is 401 and renewToken fails should call onQuit`() {
+    fun `authenticate when first response is 401 and refresh succeeds should return new request`() {
+        val tokensFlow =
+            MutableStateFlow(Tokens(TEST_USER_ID, TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME))
+        val refreshedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
+
+        every { mockLoginRepository.tokens } returns tokensFlow
+        coEvery { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = refreshedTokens }
+
         val firstResponse = mockk<Response>()
         every { firstResponse.priorResponse } returns null
         every { firstResponse.request } returns baseRequest
-        every { mockRenewToken.invoke() } throws RuntimeException()
 
         val result = authenticator.authenticate(null, firstResponse)
 
-        verify(exactly = 1) { mockRenewToken.invoke() }
+        coVerify(exactly = 1) { mockLoginRepository.refreshSync() }
+        verify(exactly = 0) { mockOnQuit.invoke() }
+
+        assertNotNull(result)
+        assertEquals(String.format(HEADER_AUTH_VALUE, NEW_ACCESS_TOKEN), result!!.header(HEADER_AUTH_KEY))
+    }
+
+    @Test
+    fun `authenticate when first response is 401 and refresh fails should call onQuit`() {
+        val tokensFlow =
+            MutableStateFlow(Tokens(TEST_USER_ID, TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME))
+
+        every { mockLoginRepository.tokens } returns tokensFlow
+        coEvery { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = Tokens.BLANK }
+
+        val firstResponse = mockk<Response>()
+        every { firstResponse.priorResponse } returns null
+        every { firstResponse.request } returns baseRequest
+
+        val result = authenticator.authenticate(null, firstResponse)
+
+        coVerify(exactly = 1) { mockLoginRepository.refreshSync() }
         verify(exactly = 1) { mockOnQuit.invoke() }
         assertNull(result)
     }
 
     @Test
-    fun `authenticate when second consecutive response is 401 should call onQuit and not renew`() {
+    fun `authenticate when second consecutive response is 401 should call onQuit and not refresh`() {
         val first401Response = mockk<Response>()
         val second401Response = mockk<Response>()
 
@@ -66,15 +88,21 @@ class AuthenticatorTest {
         val result = authenticator.authenticate(null, second401Response)
 
         verify(exactly = 1) { mockOnQuit.invoke() }
-        verify(exactly = 0) { mockRenewToken.invoke() }
+        coVerify(exactly = 0) { mockLoginRepository.refreshSync() }
         assertNull(result)
     }
 
     @Test
-    fun `authenticate when current is 401 and prior was not 401 should renew token`() {
+    fun `authenticate when current is 401 and prior was not 401 should refresh token`() {
+        val tokensFlow =
+            MutableStateFlow(Tokens(TEST_USER_ID, TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME))
+        val refreshedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
+
+        every { mockLoginRepository.tokens } returns tokensFlow
+        coEvery { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = refreshedTokens }
+
         val priorNon401Response = mockk<Response>()
         val current401Response = mockk<Response>()
-        val newToken = "new_token_after_non_401_prior"
 
         every { priorNon401Response.code } returns 500
         every { priorNon401Response.priorResponse } returns null
@@ -82,13 +110,12 @@ class AuthenticatorTest {
         every { current401Response.priorResponse } returns priorNon401Response
         every { current401Response.request } returns baseRequest
         every { current401Response.code } returns 401
-        every { mockRenewToken.invoke() } returns newToken
 
-        val result: Request? = authenticator.authenticate(null, current401Response)
+        val result = authenticator.authenticate(null, current401Response)
 
-        verify(exactly = 1) { mockRenewToken.invoke() }
+        coVerify(exactly = 1) { mockLoginRepository.refreshSync() }
         verify(exactly = 0) { mockOnQuit.invoke() }
         assertNotNull(result)
-        assertEquals(String.format(HEADER_AUTH_VALUE, newToken), result!!.header(HEADER_AUTH_KEY))
+        assertEquals(String.format(HEADER_AUTH_VALUE, NEW_ACCESS_TOKEN), result!!.header(HEADER_AUTH_KEY))
     }
 }
