@@ -4,7 +4,6 @@ import com.vladislaviliev.meet.network.repositories.LoginRepository
 import com.vladislaviliev.meet.network.repositories.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.SessionRepository
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import org.junit.Test
 import org.koin.core.Koin
 import org.koin.core.annotation.KoinExperimentalAPI
