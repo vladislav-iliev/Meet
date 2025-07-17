@@ -21,7 +21,7 @@ val appModule = module {
         CognitoControllerApi(client = client.instance)
     }
     singleOf(::TokenParser)
-    single<SessionRepository> { params -> SessionRepository(params.get(), get()) }
+    single<SessionRepository> { SessionRepository(getKoin(), get()) }
 
     scope<Session> {
         scoped<LoginRepository> {
