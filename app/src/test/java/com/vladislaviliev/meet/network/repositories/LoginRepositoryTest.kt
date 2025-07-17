@@ -179,7 +179,7 @@ class LoginRepositoryTest {
     }
 
     @Test
-    fun `refreshSync success updates tokens and completes synchronously`() = runTest {
+    fun `refreshSync success updates tokens`() = runTest {
         val repository = createRepository()
 
         performInitialLogin(repository)
@@ -195,23 +195,6 @@ class LoginRepositoryTest {
 
         coVerify { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) }
         verify { mockTokenParser.parseExpiration(NEW_ACCESS_TOKEN) }
-    }
-
-    @Test
-    fun `refreshSync with blank tokens tries to refresh with blank values`() = runTest {
-        val repository = createRepository()
-
-        assertEquals(Tokens.BLANK, repository.tokens.value)
-
-        coEvery { mockApi.refreshToken(Tokens.BLANK.refresh, Tokens.BLANK.userId) } throws
-                ClientException("Invalid token", 400, null)
-
-        repository.refreshSync()
-
-        assertEquals(Tokens.BLANK, repository.tokens.value)
-
-        coVerify { mockApi.refreshToken(Tokens.BLANK.refresh, Tokens.BLANK.userId) }
-        verify(exactly = 0) { mockTokenParser.parseExpiration(any()) }
     }
 
     @Test
@@ -250,6 +233,23 @@ class LoginRepositoryTest {
 
         coVerify { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) }
         verify { mockTokenParser.parseExpiration(NEW_ACCESS_TOKEN) }
+    }
+
+    @Test
+    fun `refreshSync with blank tokens attempts refresh with blank values`() = runTest {
+        val repository = createRepository()
+
+        assertEquals(Tokens.BLANK, repository.tokens.value)
+
+        coEvery { mockApi.refreshToken(Tokens.BLANK.refresh, Tokens.BLANK.userId) } throws
+                ClientException("Invalid token", 400, null)
+
+        repository.refreshSync()
+
+        assertEquals(Tokens.BLANK, repository.tokens.value)
+
+        coVerify { mockApi.refreshToken(Tokens.BLANK.refresh, Tokens.BLANK.userId) }
+        verify(exactly = 0) { mockTokenParser.parseExpiration(any()) }
     }
 
     @Test

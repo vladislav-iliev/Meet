@@ -18,10 +18,10 @@ internal class LoginRepository(
     private val _tokens = MutableStateFlow(Tokens.BLANK)
     val tokens = _tokens.asStateFlow()
 
-    private suspend fun doLogin(username: String, password: String) {
+    private fun loginSync(username: String, password: String) {
         val response = runCatching { api.login(username, password) }
         if (response.isFailure) {
-            _tokens.emit(Tokens.BLANK)
+            _tokens.value = Tokens.BLANK
             return
         }
 
@@ -29,18 +29,18 @@ internal class LoginRepository(
         val accessToken = responseValue.accessToken
         val expiryParsed = runCatching { parser.parseExpiration(accessToken) }
         if (expiryParsed.isFailure) {
-            _tokens.emit(Tokens.BLANK)
+            _tokens.value = Tokens.BLANK
             return
         }
 
         val tokens = Tokens(responseValue.userId, accessToken, responseValue.refreshToken, expiryParsed.getOrNull()!!)
-        _tokens.emit(tokens)
+        _tokens.value = tokens
     }
 
-    private suspend fun doRefresh(refreshToken: String, userId: String) {
+    private fun refreshSync(refreshToken: String, userId: String) {
         val response = runCatching { api.refreshToken(refreshToken, userId) }
         if (response.isFailure) {
-            _tokens.emit(Tokens.BLANK)
+            _tokens.value = Tokens.BLANK
             return
         }
 
@@ -48,33 +48,33 @@ internal class LoginRepository(
         val newAccessToken = responseValue.accessToken
         val expiryParsed = runCatching { parser.parseExpiration(newAccessToken) }
         if (expiryParsed.isFailure) {
-            _tokens.emit(Tokens.BLANK)
+            _tokens.value = Tokens.BLANK
             return
         }
 
         val tokens = Tokens(userId, newAccessToken, refreshToken, expiryParsed.getOrNull()!!)
-        _tokens.emit(tokens)
+        _tokens.value = tokens
     }
 
     fun login(username: String, password: String) {
         scope.launch(dispatcher) {
-            doLogin(username, password)
+            loginSync(username, password)
         }
     }
 
     fun refresh() {
         scope.launch(dispatcher) {
-            doRefresh(tokens.value.refresh, tokens.value.userId)
+            refreshSync(tokens.value.refresh, tokens.value.userId)
         }
     }
 
-    suspend fun refreshSync() = scope.launch(dispatcher) {
-        doRefresh(tokens.value.refresh, tokens.value.userId)
-    }.join()
+    fun refreshSync() {
+        refreshSync(tokens.value.refresh, tokens.value.userId)
+    }
 
     fun logout() {
         scope.launch(dispatcher) {
-            _tokens.emit(Tokens.BLANK)
+            _tokens.value = Tokens.BLANK
         }
     }
 }

@@ -20,7 +20,7 @@ internal class Authenticator(
             onQuit()
             return null
         }
-        runBlocking { loginRepository.refreshSync() }
+        loginRepository.refreshSync()
         val newTokens = loginRepository.tokens.value
         if (newTokens.isBlank) {
             onQuit()
