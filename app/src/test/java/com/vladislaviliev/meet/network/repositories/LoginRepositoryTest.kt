@@ -268,7 +268,7 @@ class LoginRepositoryTest {
     }
 
     @Test
-    fun `tokens StateFlow starts with blank tokens`() = runTest {
+    fun `tokens start blank`() = runTest {
         val repository = createRepository()
         assertEquals(Tokens.BLANK, repository.tokens.value)
     }
