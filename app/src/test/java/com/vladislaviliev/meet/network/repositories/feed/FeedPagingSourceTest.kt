@@ -4,7 +4,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.testing.TestPager
-import com.vladislaviliev.meet.user.User
+import com.vladislaviliev.meet.network.repositories.user.User
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineDispatcher

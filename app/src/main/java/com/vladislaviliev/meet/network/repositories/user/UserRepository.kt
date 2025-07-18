@@ -1,8 +1,6 @@
-package com.vladislaviliev.meet.network.repositories
+package com.vladislaviliev.meet.network.repositories.user
 
 import com.vladislaviliev.meet.network.Tokens
-import com.vladislaviliev.meet.user.User
-import com.vladislaviliev.meet.user.UserState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

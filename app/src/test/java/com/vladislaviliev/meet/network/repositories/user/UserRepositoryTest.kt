@@ -1,7 +1,6 @@
-package com.vladislaviliev.meet.network.repositories
+package com.vladislaviliev.meet.network.repositories.user
 
 import com.vladislaviliev.meet.network.Tokens
-import com.vladislaviliev.meet.user.UserState
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -34,7 +33,8 @@ class UserRepositoryTest {
         every { userInfoDto.location } returns location
         coEvery { api.getUserInfo("userId") } returns userInfoDto
 
-        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
+        val userRepository =
+            UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
         assertEquals(UserState.Loading, userRepository.userState.value)
 
         runCurrent()
@@ -90,7 +90,7 @@ class UserRepositoryTest {
         val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
         runCurrent()
 
-        loginTokens.value = Tokens.BLANK
+        loginTokens.value = Tokens.Companion.BLANK
         userRepository.userState.first { it is UserState.Disconnected }
     }
 
@@ -109,7 +109,7 @@ class UserRepositoryTest {
         val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
         runCurrent()
 
-        loginTokens.value = Tokens.BLANK
+        loginTokens.value = Tokens.Companion.BLANK
         userRepository.userState.first { it is UserState.Disconnected }
         assertEquals(UserState.Disconnected, userRepository.userState.value)
 
@@ -133,7 +133,6 @@ class UserRepositoryTest {
         every { userInfoDto.location } returns location
         coEvery { api.getUserInfo("userId") } returns userInfoDto
 
-        // When
         val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
         runCurrent()
 
@@ -146,7 +145,6 @@ class UserRepositoryTest {
 
     @Test
     fun `multiple token changes should update state correctly`() = runTest {
-        // Given
         val loginTokens = MutableStateFlow(Tokens("userId", "access", "refresh", 123456789))
         val api = mockk<UserControllerApi>()
 
@@ -157,11 +155,11 @@ class UserRepositoryTest {
         every { userInfoDto.location } returns location
         coEvery { api.getUserInfo("userId") } returns userInfoDto
 
-        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
+        val userRepository =
+            UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
         runCurrent()
 
-        // When - multiple token changes
-        loginTokens.value = Tokens.BLANK
+        loginTokens.value = Tokens.Companion.BLANK
         userRepository.userState.first { it is UserState.Disconnected }
         assertEquals(UserState.Disconnected, userRepository.userState.value)
 

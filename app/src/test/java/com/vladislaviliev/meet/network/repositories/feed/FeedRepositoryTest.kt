@@ -2,8 +2,8 @@ package com.vladislaviliev.meet.network.repositories.feed
 
 import androidx.paging.PagingConfig
 import androidx.paging.testing.asSnapshot
-import com.vladislaviliev.meet.user.User
-import com.vladislaviliev.meet.user.UserState
+import com.vladislaviliev.meet.network.repositories.user.User
+import com.vladislaviliev.meet.network.repositories.user.UserState
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk

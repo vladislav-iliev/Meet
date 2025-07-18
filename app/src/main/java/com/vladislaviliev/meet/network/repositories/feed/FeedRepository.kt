@@ -2,7 +2,7 @@ package com.vladislaviliev.meet.network.repositories.feed
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import com.vladislaviliev.meet.user.UserState
+import com.vladislaviliev.meet.network.repositories.user.UserState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.apis.PostControllerApi

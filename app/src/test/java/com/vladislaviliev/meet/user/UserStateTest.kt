@@ -1,5 +1,7 @@
 package com.vladislaviliev.meet.user
 
+import com.vladislaviliev.meet.network.repositories.user.User
+import com.vladislaviliev.meet.network.repositories.user.UserState
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals

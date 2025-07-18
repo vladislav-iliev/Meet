@@ -2,7 +2,7 @@ package com.vladislaviliev.meet.network.repositories.feed
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.vladislaviliev.meet.user.User
+import com.vladislaviliev.meet.network.repositories.user.User
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okhttp3.internal.http2.ConnectionShutdownException

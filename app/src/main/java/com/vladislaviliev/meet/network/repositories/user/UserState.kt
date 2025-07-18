@@ -1,4 +1,4 @@
-package com.vladislaviliev.meet.user
+package com.vladislaviliev.meet.network.repositories.user
 
 internal sealed class UserState {
     object Loading : UserState()
