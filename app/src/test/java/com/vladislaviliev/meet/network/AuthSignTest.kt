@@ -16,17 +16,13 @@ class AuthSignTest {
 
     @Test
     fun `sign doesn't add empty headers`() {
-        val originalRequest =
-            Request.Builder().url("https://example.com").header("Existing-Header", "ExistingValue").build()
-
-        val signedRequest = originalRequest.sign("")
-        assertNull(signedRequest.header(HEADER_AUTH_KEY))
+        val originalRequest = Request.Builder().url("https://example.com").build()
+        assertNull(originalRequest.sign("").header(HEADER_AUTH_KEY))
     }
 
     @Test
     fun `sign adds Authorization header correctly`() {
-        val originalRequest =
-            Request.Builder().url("https://example.com").header("Existing-Header", "ExistingValue").build()
+        val originalRequest = Request.Builder().url("https://example.com").build()
         val testToken = "sample_access_token"
 
         val signedRequest = originalRequest.sign(testToken)
