@@ -29,15 +29,33 @@ class FeedPagingSourceTest {
 
     private val user = User(latitude = 40.7128, longitude = -74.0060)
 
-    private fun createTestPostResponseDto(
-        id: String,
-        title: String
-    ): PostResponseDto {
-        return PostResponseDto(
+    private fun createTestPostResponseDto(id: String, title: String) = PostResponseDto(
+        id = id,
+        title = title,
+        description = "Test description",
+        images = listOf("image1.jpg", "image2.jpg"),
+        location = BaseLocation(
+            latitude = 40.7128,
+            longitude = -74.0060,
+            address = "Test Address",
+            city = "Test City",
+            country = "Test Country",
+            name = "Test Location"
+        ),
+        createdAt = OffsetDateTime.now(),
+        interests = setOf(
+            Interest(
+                name = "Test Interest",
+                icon = "test-icon",
+                category = "SPORTS"
+            )
+        ),
+        owner = MiniUser(
             id = id,
-            title = title,
-            description = "Test description",
-            images = listOf("image1.jpg", "image2.jpg"),
+            firstName = "Test",
+            lastName = "User",
+            profilePhotos = listOf("profile.jpg"),
+            occupation = "Test Occupation",
             location = BaseLocation(
                 latitude = 40.7128,
                 longitude = -74.0060,
@@ -46,49 +64,26 @@ class FeedPagingSourceTest {
                 country = "Test Country",
                 name = "Test Location"
             ),
-            createdAt = OffsetDateTime.now(),
-            interests = setOf(
-                Interest(
-                    name = "Test Interest",
-                    icon = "test-icon",
-                    category = "SPORTS"
-                )
-            ),
-            owner = MiniUser(
-                id = id,
-                firstName = "Test",
-                lastName = "User",
-                profilePhotos = listOf("profile.jpg"),
-                occupation = "Test Occupation",
-                location = BaseLocation(
-                    latitude = 40.7128,
-                    longitude = -74.0060,
-                    address = "Test Address",
-                    city = "Test City",
-                    country = "Test Country",
-                    name = "Test Location"
-                ),
-                birthDate = LocalDate.now(),
-                userRole = MiniUser.UserRole.NORMAL,
-            ),
-            payment = 0.0,
-            accessibility = PostResponseDto.Accessibility.PUBLIC,
-            askToJoin = false,
-            needsLocationalConfirmation = false,
-            participantsCount = 5,
-            status = PostResponseDto.Status.NOT_STARTED,
-            savedByCurrentUser = false,
-            blockedForCurrentUser = false,
-            maximumPeople = 10,
-            toDate = OffsetDateTime.now().plusHours(2),
-            fromDate = OffsetDateTime.now().plusHours(1),
-            currency = null,
-            rating = 4.5,
-            clubId = null,
-            chatRoomId = "chat-room-123",
-            currentUserStatus = PostResponseDto.CurrentUserStatus.PARTICIPATING
-        )
-    }
+            birthDate = LocalDate.now(),
+            userRole = MiniUser.UserRole.NORMAL,
+        ),
+        payment = 0.0,
+        accessibility = PostResponseDto.Accessibility.PUBLIC,
+        askToJoin = false,
+        needsLocationalConfirmation = false,
+        participantsCount = 5,
+        status = PostResponseDto.Status.NOT_STARTED,
+        savedByCurrentUser = false,
+        blockedForCurrentUser = false,
+        maximumPeople = 10,
+        toDate = OffsetDateTime.now().plusHours(2),
+        fromDate = OffsetDateTime.now().plusHours(1),
+        currency = null,
+        rating = 4.5,
+        clubId = null,
+        chatRoomId = "chat-room-123",
+        currentUserStatus = PostResponseDto.CurrentUserStatus.PARTICIPATING
+    )
 
     @Test
     fun `load returns page when successful`() = runTest {
