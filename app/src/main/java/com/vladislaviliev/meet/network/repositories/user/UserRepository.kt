@@ -6,8 +6,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openapitools.client.apis.UserControllerApi
@@ -15,14 +13,14 @@ import org.openapitools.client.apis.UserControllerApi
 internal class UserRepository(
     private val scope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher,
-    private val loginTokens: StateFlow<Tokens>,
     private val api: UserControllerApi,
+    val loginTokens: StateFlow<Tokens>,
 ) {
-    private val _userState = MutableStateFlow<UserState>(UserState.Loading)
-    val userState = _userState.asStateFlow()
+    private val _user = MutableStateFlow<User?>(null)
+    val user = _user.asStateFlow()
 
     init {
-        scope.launch { load() }
+        load()
     }
 
     private suspend fun downloadInfo(): User {
@@ -30,18 +28,8 @@ internal class UserRepository(
         return User(response.location.latitude, response.location.longitude)
     }
 
-    private fun collectLoginTokens(user: User) {
-        loginTokens
-            .onEach { _userState.value = if (it.isBlank) UserState.Disconnected else UserState.Connected(user) }
-            .launchIn(scope)
-    }
-
-    private suspend fun load() {
+    private fun load() = scope.launch {
         val apiResponse = runCatching { downloadInfo() }
-        if (apiResponse.isFailure) {
-            _userState.value = UserState.Disconnected
-            return
-        }
-        collectLoginTokens(apiResponse.getOrNull()!!)
+        _user.value = apiResponse.getOrNull()
     }
 }

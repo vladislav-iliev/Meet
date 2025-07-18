@@ -1,18 +1,16 @@
 package com.vladislaviliev.meet.network.repositories.feed
 
 import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
 import androidx.paging.testing.asSnapshot
 import com.vladislaviliev.meet.network.repositories.user.User
-import com.vladislaviliev.meet.network.repositories.user.UserState
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import okhttp3.internal.http2.ConnectionShutdownException
 import org.junit.After
 import org.junit.Test
 import org.openapitools.client.apis.PostControllerApi
@@ -31,22 +29,19 @@ class FeedRepositoryTest {
 
     private val mockApi = mockk<PostControllerApi>()
     private val testUser = User(latitude = 40.7128, longitude = -74.0060)
-    private val userStateFlow = MutableStateFlow<UserState>(UserState.Connected(testUser))
-
     private val pagingConfig = PagingConfig(pageSize = 10, enablePlaceholders = false, initialLoadSize = 10)
 
     @After
     fun tearDown() {
         clearMocks(mockApi)
-        userStateFlow.value = UserState.Connected(testUser)
     }
 
     private fun TestScope.createRepository(
-        userState: MutableStateFlow<UserState> = userStateFlow
+        user: User = testUser
     ) = FeedRepository(
         dispatcher = StandardTestDispatcher(testScheduler),
         api = mockApi,
-        userState = userState,
+        user = user,
         pagingConfig = pagingConfig
     )
 
@@ -83,7 +78,7 @@ class FeedRepositoryTest {
     fun `repository initializes with correct dependencies`() = runTest {
         val repository = createRepository()
         assertNotNull(repository.feed)
-        assertEquals(userStateFlow, repository.userState)
+        assertEquals(testUser, repository.user)
     }
 
     @Test
@@ -110,17 +105,13 @@ class FeedRepositoryTest {
         } returns mockResponse
 
         val repository = createRepository()
-
-        assertNotNull(repository.feed)
-        assertTrue(true)
-
         val snapshot = repository.feed.asSnapshot()
         assertEquals(expectedPosts, snapshot)
     }
 
     @Test
-    fun `feed uses current user from userState`() = runTest {
-        val updatedUser = User(latitude = 51.5074, longitude = -0.1278)
+    fun `feed uses provided user coordinates`() = runTest {
+        val customUser = User(latitude = 51.5074, longitude = -0.1278)
         val mockResponse = ListResponseDtoPostResponseDto(
             data = emptyList(),
             lastPage = true,
@@ -140,19 +131,14 @@ class FeedRepositoryTest {
             )
         } returns mockResponse
 
-        val repository = createRepository()
-
-        // Update user state
-        userStateFlow.value = UserState.Connected(updatedUser)
-
+        val repository = createRepository(user = customUser)
         val snapshot = repository.feed.asSnapshot()
 
-        // Verify the API was called with updated user coordinates
         verify {
             mockApi.getAllPosts(
                 sortBy = PostControllerApi.SortByGetAllPosts.CREATED_AT,
-                latitude = updatedUser.latitude,
-                longitude = updatedUser.longitude,
+                latitude = customUser.latitude,
+                longitude = customUser.longitude,
                 distance = 1_000_000,
                 pageNumber = 0,
                 pageSize = 10,
@@ -162,39 +148,6 @@ class FeedRepositoryTest {
         }
 
         assertEquals(emptyList(), snapshot)
-    }
-
-    @Test
-    fun `feed handles loading user state`() = runTest {
-        val loadingUserState = MutableStateFlow<UserState>(UserState.Loading)
-        val repository = createRepository(userState = loadingUserState)
-
-        // When user is loading, the paging source should handle this gracefully
-        // The snapshot collection should not throw an exception
-        try {
-            val snapshot = repository.feed.asSnapshot()
-            // If we reach here, the error was handled properly
-            assertTrue(true)
-        } catch (e: Exception) {
-            // Expected - this shows the error handling is working
-            assertTrue(e is ConnectionShutdownException)
-        }
-    }
-
-    @Test
-    fun `feed handles disconnected user state`() = runTest {
-        val disconnectedUserState = MutableStateFlow<UserState>(UserState.Disconnected)
-        val repository = createRepository(userState = disconnectedUserState)
-
-        // When user is disconnected, the paging source should handle this gracefully
-        try {
-            val snapshot = repository.feed.asSnapshot()
-            // If we reach here, the error was handled properly
-            assertTrue(true)
-        } catch (e: Exception) {
-            // Expected - this shows the error handling is working
-            assertTrue(e is ConnectionShutdownException)
-        }
     }
 
     @Test
@@ -208,7 +161,7 @@ class FeedRepositoryTest {
         val repository = FeedRepository(
             dispatcher = StandardTestDispatcher(testScheduler),
             api = mockApi,
-            userState = userStateFlow,
+            user = testUser,
             pagingConfig = customPagingConfig
         )
 
@@ -232,7 +185,6 @@ class FeedRepositoryTest {
         } returns mockResponse
 
         val snapshot = repository.feed.asSnapshot()
-
         assertEquals(emptyList(), snapshot)
     }
 
@@ -267,48 +219,36 @@ class FeedRepositoryTest {
     }
 
     @Test
-    fun `userState property returns correct state flow`() = runTest {
-        val repository = createRepository()
-
-        assertEquals(userStateFlow, repository.userState)
-        assertEquals(UserState.Connected(testUser), repository.userState.value)
-    }
-
-    @Test
-    fun `feed handles API exceptions correctly`() = runTest {
+    fun `paging source handles API exceptions correctly`() = runTest {
         val expectedException = IOException("Network error")
 
         coEvery {
-            mockApi.getAllPosts(
-                sortBy = any(),
-                latitude = any(),
-                longitude = any(),
-                distance = any(),
-                pageNumber = any(),
-                pageSize = any(),
-                fromDate = any(),
-                toDate = any()
-            )
+            mockApi.getAllPosts(any(), any(), any(), any(), any(), any(), any(), any())
         } throws expectedException
 
-        val repository = createRepository()
+        val pagingSource = FeedPagingSource(
+            dispatcher = StandardTestDispatcher(testScheduler),
+            api = mockApi,
+            user = testUser
+        )
 
-        // When API throws exception, the paging source should handle it
-        try {
-            val snapshot = repository.feed.asSnapshot()
-            // If we reach here, the error was handled properly
-            assertTrue(true)
-        } catch (e: Exception) {
-            // Expected - this shows the error handling is working
-            assertTrue(e is IOException && e.message == "Network error")
-        }
+        val result = pagingSource.load(
+            PagingSource.LoadParams.Refresh(
+                key = null,
+                loadSize = 10,
+                placeholdersEnabled = false
+            )
+        )
+
+        assertTrue(result is PagingSource.LoadResult.Error)
+        assertEquals(expectedException::class, result.throwable::class)
+        assertEquals(expectedException.message, result.throwable.message)
     }
 
     @Test
-    fun `feed handles user state changes during pagination`() = runTest {
-        val initialUser = User(latitude = 40.7128, longitude = -74.0060)
-        val updatedUser = User(latitude = 51.5074, longitude = -0.1278)
-        val mutableUserState = MutableStateFlow<UserState>(UserState.Connected(initialUser))
+    fun `different users create different feed results`() = runTest {
+        val user1 = User(latitude = 40.7128, longitude = -74.0060)
+        val user2 = User(latitude = 51.5074, longitude = -0.1278)
 
         val mockResponse = ListResponseDtoPostResponseDto(
             data = listOf(createTestPostResponseDto()),
@@ -329,18 +269,12 @@ class FeedRepositoryTest {
             )
         } returns mockResponse
 
-        val repository = createRepository(userState = mutableUserState)
+        val repository1 = createRepository(user = user1)
+        val repository2 = createRepository(user = user2)
 
-        // First collection with initial user
-        val snapshot1 = repository.feed.asSnapshot()
+        val snapshot1 = repository1.feed.asSnapshot()
+        val snapshot2 = repository2.feed.asSnapshot()
 
-        // Change user state
-        mutableUserState.value = UserState.Connected(updatedUser)
-
-        // Second collection with updated user
-        val snapshot2 = repository.feed.asSnapshot()
-
-        // Both should work but with different user coordinates
         assertEquals(1, snapshot1.size)
         assertEquals(1, snapshot2.size)
     }

@@ -16,13 +16,14 @@ import org.openapitools.client.apis.UserControllerApi
 import org.openapitools.client.models.BaseLocation
 import org.openapitools.client.models.UserInfoDto
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class UserRepositoryTest {
 
     @Test
-    fun `init should call load and set initial state to Loading`() = runTest {
+    fun `init should call load and start with null user`() = runTest {
         val loginTokens = MutableStateFlow(Tokens("userId", "access", "refresh", 123456789))
         val api = mockk<UserControllerApi>()
 
@@ -33,17 +34,16 @@ class UserRepositoryTest {
         every { userInfoDto.location } returns location
         coEvery { api.getUserInfo("userId") } returns userInfoDto
 
-        val userRepository =
-            UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
-        assertEquals(UserState.Loading, userRepository.userState.value)
+        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, api, loginTokens)
+        assertNull(userRepository.user.value)
 
         runCurrent()
         coVerify { api.getUserInfo("userId") }
-        assertTrue(userRepository.userState.value is UserState.Connected)
+        assertNotNull(userRepository.user.value)
     }
 
     @Test
-    fun `load should set Connected state when API call succeeds`() = runTest {
+    fun `load should set user when API call succeeds`() = runTest {
         val loginTokens = MutableStateFlow(Tokens("userId", "access", "refresh", 123456789))
         val api = mockk<UserControllerApi>()
 
@@ -54,29 +54,29 @@ class UserRepositoryTest {
         every { userInfoDto.location } returns location
         coEvery { api.getUserInfo("userId") } returns userInfoDto
 
-        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
+        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, api, loginTokens)
         runCurrent()
 
-        val state = userRepository.userState.value
-        assertTrue(state is UserState.Connected)
-        assertEquals(15.5, state.user.latitude)
-        assertEquals(25.5, state.user.longitude)
+        val user = userRepository.user.value
+        assertNotNull(user)
+        assertEquals(15.5, user.latitude)
+        assertEquals(25.5, user.longitude)
     }
 
     @Test
-    fun `load should set Disconnected state when API call fails`() = runTest {
+    fun `load should keep user null when API call fails`() = runTest {
         val loginTokens = MutableStateFlow(Tokens("userId", "access", "refresh", 123456789))
         val api = mockk<UserControllerApi>()
 
         coEvery { api.getUserInfo("userId") } throws RuntimeException("API Error")
 
-        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
+        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, api, loginTokens)
         runCurrent()
-        assertEquals(UserState.Disconnected, userRepository.userState.value)
+        assertNull(userRepository.user.value)
     }
 
     @Test
-    fun `collectLoginTokens should set Disconnected when tokens are blank`() = runTest {
+    fun `loginTokens should expose the provided tokens flow`() = runTest {
         val loginTokens = MutableStateFlow(Tokens("userId", "access", "refresh", 123456789))
         val api = mockk<UserControllerApi>()
 
@@ -87,38 +87,11 @@ class UserRepositoryTest {
         every { userInfoDto.location } returns location
         coEvery { api.getUserInfo("userId") } returns userInfoDto
 
-        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
-        runCurrent()
+        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, api, loginTokens)
 
-        loginTokens.value = Tokens.Companion.BLANK
-        userRepository.userState.first { it is UserState.Disconnected }
-    }
-
-    @Test
-    fun `collectLoginTokens should set Connected when tokens are not blank`() = runTest {
-        val loginTokens = MutableStateFlow(Tokens("userId", "access", "refresh", 123456789))
-        val api = mockk<UserControllerApi>()
-
-        val location = mockk<BaseLocation>()
-        val userInfoDto = mockk<UserInfoDto>()
-        every { location.latitude } returns 30.0
-        every { location.longitude } returns 40.0
-        every { userInfoDto.location } returns location
-        coEvery { api.getUserInfo("userId") } returns userInfoDto
-
-        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
-        runCurrent()
-
-        loginTokens.value = Tokens.Companion.BLANK
-        userRepository.userState.first { it is UserState.Disconnected }
-        assertEquals(UserState.Disconnected, userRepository.userState.value)
-
-        loginTokens.value = Tokens("newUserId", "newAccess", "newRefresh", 987654321)
-        userRepository.userState.first { it is UserState.Connected }
-        val state = userRepository.userState.value
-        assertTrue(state is UserState.Connected)
-        assertEquals(30.0, state.user.latitude)
-        assertEquals(40.0, state.user.longitude)
+        assertEquals(loginTokens.value, userRepository.loginTokens.value)
+        assertEquals("userId", userRepository.loginTokens.value.userId)
+        assertEquals("access", userRepository.loginTokens.value.access)
     }
 
     @Test
@@ -133,18 +106,17 @@ class UserRepositoryTest {
         every { userInfoDto.location } returns location
         coEvery { api.getUserInfo("userId") } returns userInfoDto
 
-        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
+        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, api, loginTokens)
         runCurrent()
 
-        userRepository.userState.first { it is UserState.Connected }
-        val state = userRepository.userState.value
-        assertTrue(state is UserState.Connected)
-        assertEquals(50.0, state.user.latitude)
-        assertEquals(60.0, state.user.longitude)
+        val user = userRepository.user.value
+        assertNotNull(user)
+        assertEquals(50.0, user.latitude)
+        assertEquals(60.0, user.longitude)
     }
 
     @Test
-    fun `multiple token changes should update state correctly`() = runTest {
+    fun `token changes should be reflected in loginTokens flow`() = runTest {
         val loginTokens = MutableStateFlow(Tokens("userId", "access", "refresh", 123456789))
         val api = mockk<UserControllerApi>()
 
@@ -153,26 +125,17 @@ class UserRepositoryTest {
         every { location.latitude } returns 10.0
         every { location.longitude } returns 20.0
         every { userInfoDto.location } returns location
-        coEvery { api.getUserInfo("userId") } returns userInfoDto
+        coEvery { api.getUserInfo(any()) } returns userInfoDto
 
-        val userRepository =
-            UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, loginTokens, api)
+        val userRepository = UserRepository(backgroundScope, coroutineContext[CoroutineDispatcher]!!, api, loginTokens)
         runCurrent()
 
-        loginTokens.value = Tokens.Companion.BLANK
-        userRepository.userState.first { it is UserState.Disconnected }
-        assertEquals(UserState.Disconnected, userRepository.userState.value)
+        loginTokens.value = Tokens("newUserId", "newAccess", "newRefresh", 987654321)
 
-        loginTokens.value = Tokens("user1", "access1", "refresh1", 1111)
-        userRepository.userState.first { it is UserState.Connected }
-        assertTrue(userRepository.userState.value is UserState.Connected)
-
-        loginTokens.value = Tokens("", "", "", -1)
-        userRepository.userState.first { it is UserState.Disconnected }
-        assertEquals(UserState.Disconnected, userRepository.userState.value)
-
-        loginTokens.value = Tokens("user2", "access2", "refresh2", 2222)
-        userRepository.userState.first { it is UserState.Connected }
-        assertTrue(userRepository.userState.value is UserState.Connected)
+        val newTokens = userRepository.loginTokens.first()
+        assertEquals("newUserId", newTokens.userId)
+        assertEquals("newAccess", newTokens.access)
+        assertEquals("newRefresh", newTokens.refresh)
+        assertEquals(987654321, newTokens.expiry)
     }
 }

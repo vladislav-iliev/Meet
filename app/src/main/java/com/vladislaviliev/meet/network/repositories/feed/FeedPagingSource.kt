@@ -5,22 +5,18 @@ import androidx.paging.PagingState
 import com.vladislaviliev.meet.network.repositories.user.User
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import okhttp3.internal.http2.ConnectionShutdownException
 import org.openapitools.client.apis.PostControllerApi
 import org.openapitools.client.models.PostResponseDto
 
 internal class FeedPagingSource(
     private val dispatcher: CoroutineDispatcher,
     private val api: PostControllerApi,
-    private val user: () -> User?,
+    private val user: User,
 ) : PagingSource<Int, PostResponseDto>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, PostResponseDto> {
         return try {
             val page = params.key ?: 0
-            val user = user()
-
-            user ?: return LoadResult.Error(ConnectionShutdownException())
 
             val response = withContext(dispatcher) {
                 api.getAllPosts(
