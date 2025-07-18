@@ -1,6 +1,6 @@
 package com.vladislaviliev.meet.network.client
 
-import com.vladislaviliev.meet.network.repositories.LoginRepository
+import com.vladislaviliev.meet.network.repositories.login.LoginRepository
 import com.vladislaviliev.meet.network.sign
 import okhttp3.Interceptor
 import okhttp3.Response

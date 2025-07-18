@@ -1,4 +1,4 @@
-package com.vladislaviliev.meet.network.repositories
+package com.vladislaviliev.meet.network.repositories.feed
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig

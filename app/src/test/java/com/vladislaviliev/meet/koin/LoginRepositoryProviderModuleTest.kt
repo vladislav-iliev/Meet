@@ -1,7 +1,7 @@
 package com.vladislaviliev.meet.koin
 
-import com.vladislaviliev.meet.network.repositories.LoginRepository
-import com.vladislaviliev.meet.network.repositories.LoginRepositoryProvider
+import com.vladislaviliev.meet.network.repositories.login.LoginRepository
+import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
 import com.vladislaviliev.meet.session.SessionRepository
 import junit.framework.TestCase.assertFalse
 import kotlinx.coroutines.flow.first

@@ -1,7 +1,7 @@
 package com.vladislaviliev.meet.network.client
 
-import com.vladislaviliev.meet.network.repositories.LoginRepository
-import com.vladislaviliev.meet.network.repositories.LoginRepositoryProvider
+import com.vladislaviliev.meet.network.repositories.login.LoginRepository
+import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow

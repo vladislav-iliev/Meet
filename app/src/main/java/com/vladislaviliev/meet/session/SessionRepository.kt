@@ -1,6 +1,6 @@
 package com.vladislaviliev.meet.session
 
-import com.vladislaviliev.meet.network.repositories.LoginRepositoryProvider
+import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
 import org.koin.core.Koin
 import org.koin.core.scope.Scope
 

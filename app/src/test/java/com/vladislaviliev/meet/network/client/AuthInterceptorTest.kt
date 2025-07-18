@@ -3,7 +3,7 @@ package com.vladislaviliev.meet.network.client
 import com.vladislaviliev.meet.network.HEADER_AUTH_KEY
 import com.vladislaviliev.meet.network.HEADER_AUTH_VALUE
 import com.vladislaviliev.meet.network.Tokens
-import com.vladislaviliev.meet.network.repositories.LoginRepository
+import com.vladislaviliev.meet.network.repositories.login.LoginRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot

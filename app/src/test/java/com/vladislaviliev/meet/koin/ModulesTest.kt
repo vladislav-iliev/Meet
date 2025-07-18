@@ -1,7 +1,7 @@
 package com.vladislaviliev.meet.koin
 
-import com.vladislaviliev.meet.network.repositories.LoginRepository
-import com.vladislaviliev.meet.network.repositories.LoginRepositoryTimer
+import com.vladislaviliev.meet.network.repositories.login.LoginRepository
+import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.SessionRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import org.junit.Test

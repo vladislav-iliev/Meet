@@ -2,9 +2,9 @@ package com.vladislaviliev.meet.koin
 
 import com.vladislaviliev.meet.network.TokenParser
 import com.vladislaviliev.meet.network.client.Client
-import com.vladislaviliev.meet.network.repositories.LoginRepository
-import com.vladislaviliev.meet.network.repositories.LoginRepositoryProvider
-import com.vladislaviliev.meet.network.repositories.LoginRepositoryTimer
+import com.vladislaviliev.meet.network.repositories.login.LoginRepository
+import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
+import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.Session
 import com.vladislaviliev.meet.session.SessionRepository
 import kotlinx.coroutines.CoroutineScope

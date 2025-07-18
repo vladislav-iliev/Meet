@@ -1,4 +1,4 @@
-package com.vladislaviliev.meet.network.repositories
+package com.vladislaviliev.meet.network.repositories.login
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

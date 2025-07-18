@@ -1,4 +1,4 @@
-package com.vladislaviliev.meet.network.repositories
+package com.vladislaviliev.meet.network.repositories.feed
 
 import androidx.paging.PagingConfig
 import androidx.paging.testing.asSnapshot
@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import okhttp3.internal.http2.ConnectionShutdownException
 import org.junit.After
 import org.junit.Test
 import org.openapitools.client.apis.PostControllerApi
@@ -176,7 +177,7 @@ class FeedRepositoryTest {
             assertTrue(true)
         } catch (e: Exception) {
             // Expected - this shows the error handling is working
-            assertTrue(e is okhttp3.internal.http2.ConnectionShutdownException)
+            assertTrue(e is ConnectionShutdownException)
         }
     }
 
@@ -192,7 +193,7 @@ class FeedRepositoryTest {
             assertTrue(true)
         } catch (e: Exception) {
             // Expected - this shows the error handling is working
-            assertTrue(e is okhttp3.internal.http2.ConnectionShutdownException)
+            assertTrue(e is ConnectionShutdownException)
         }
     }
 

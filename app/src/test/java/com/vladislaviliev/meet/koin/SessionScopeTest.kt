@@ -1,6 +1,6 @@
 package com.vladislaviliev.meet.koin
 
-import com.vladislaviliev.meet.network.repositories.LoginRepositoryTimer
+import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.SessionRepository
 import junit.framework.TestCase.assertFalse
 import org.junit.After

@@ -1,4 +1,4 @@
-package com.vladislaviliev.meet.network.repositories
+package com.vladislaviliev.meet.network.repositories.login
 
 import com.vladislaviliev.meet.network.Tokens
 import kotlinx.coroutines.CoroutineScope

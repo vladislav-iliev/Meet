@@ -1,4 +1,4 @@
-package com.vladislaviliev.meet.network.repositories
+package com.vladislaviliev.meet.network.repositories.feed
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
