@@ -3,6 +3,7 @@ package com.vladislaviliev.meet.session
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
 import io.mockk.mockk
 import io.mockk.verify
+import okhttp3.OkHttpClient
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
@@ -14,7 +15,8 @@ import org.koin.core.Koin
 class SessionRepositoryTest {
 
     private val loginRepositoryProvider = mockk<LoginRepositoryProvider>(relaxed = true)
-    private val sessionRepository = SessionRepository(Koin(), loginRepositoryProvider)
+    private val client = mockk<OkHttpClient>(relaxed = true)
+    private val sessionRepository = SessionRepository(Koin(), client, loginRepositoryProvider)
 
     @Test
     fun `initial state has no active session`() {
@@ -79,5 +81,25 @@ class SessionRepositoryTest {
         sessionRepository.startSession()
         sessionRepository.startSession()
         verify(exactly = 2) { loginRepositoryProvider.update(null) }
+    }
+
+    @Test
+    fun `endSession cancels all network requests`() {
+        sessionRepository.startSession()
+        sessionRepository.endSession()
+        verify { client.dispatcher.cancelAll() }
+    }
+
+    @Test
+    fun `startSession cancels all network requests when ending existing session`() {
+        sessionRepository.startSession()
+        sessionRepository.startSession()
+        verify(exactly = 2) { client.dispatcher.cancelAll() }
+    }
+
+    @Test
+    fun `endSession cancels requests even with null scope`() {
+        sessionRepository.endSession()
+        verify { client.dispatcher.cancelAll() }
     }
 }

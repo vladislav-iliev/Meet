@@ -1,8 +1,12 @@
 package com.vladislaviliev.meet.koin
 
+import android.util.Log
 import com.vladislaviliev.meet.network.repositories.login.LoginRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
 import com.vladislaviliev.meet.session.SessionRepository
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import junit.framework.TestCase.assertFalse
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -25,8 +29,10 @@ class LoginRepositoryProviderModuleTest : KoinTest {
 
     @Before
     fun setUp() {
-        startKoin { modules(appModule) }
+        mockkStatic(Log::class)
+        every { Log.isLoggable(any(), any()) } returns false
 
+        startKoin { modules(appModule) }
         loginRepositoryProvider = get()
         sessionRepository = get()
     }
@@ -35,6 +41,8 @@ class LoginRepositoryProviderModuleTest : KoinTest {
     fun tearDown() {
         sessionRepository.endSession()
         stopKoin()
+
+        unmockkStatic(Log::class)
     }
 
     @Test
