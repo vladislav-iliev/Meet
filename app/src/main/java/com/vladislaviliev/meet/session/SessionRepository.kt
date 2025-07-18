@@ -1,15 +1,9 @@
 package com.vladislaviliev.meet.session
 
-import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
-import okhttp3.OkHttpClient
 import org.koin.core.Koin
 import org.koin.core.scope.Scope
 
-internal class SessionRepository(
-    private val koin: Koin,
-    private val client: OkHttpClient,
-    private val loginRepositoryProvider: LoginRepositoryProvider
-) {
+internal class SessionRepository(private val koin: Koin) {
     var currentScope: Scope? = null
         private set
 
@@ -21,8 +15,6 @@ internal class SessionRepository(
     }
 
     fun endSession() {
-        client.dispatcher.cancelAll()
-        loginRepositoryProvider.update(null)
         currentScope?.close()
         currentScope = null
     }

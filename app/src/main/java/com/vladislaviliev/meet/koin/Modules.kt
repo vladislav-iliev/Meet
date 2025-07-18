@@ -23,7 +23,7 @@ val appModule = module {
     single<OkHttpClient> { Client(get()) {}.instance } binds arrayOf(Call.Factory::class)
 
     singleOf(::LoginRepositoryProvider)
-    single { SessionRepository(getKoin(), get(), get()) }
+    single { SessionRepository(getKoin()) }
 
     singleOf(::TokenParser)
 

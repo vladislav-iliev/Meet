@@ -7,7 +7,6 @@ import com.vladislaviliev.meet.session.SessionRepository
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
-import junit.framework.TestCase.assertFalse
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -92,48 +91,6 @@ class LoginRepositoryProviderModuleTest : KoinTest {
 
         // Then: Provider should contain the repository
         assertEquals(loginRepository, loginRepositoryProvider.current.first())
-    }
-
-    @Test
-    fun `LoginRepositoryProvider is cleared when session ends`() = runTest {
-        // Given: Session is started and provider is updated
-        sessionRepository.startSession()
-        loginRepositoryProvider.update(sessionRepository.currentScope?.get<LoginRepository>())
-
-        assertNotNull(loginRepositoryProvider.current.first())
-
-        // When: Session is ended
-        sessionRepository.endSession()
-
-        // Then: Provider should be cleared
-        assertNull(loginRepositoryProvider.current.first())
-    }
-
-    @Test
-    fun `LoginRepositoryProvider and SessionRepository integration works correctly`() = runTest {
-        // Given: Initial state
-        assertNull(loginRepositoryProvider.current.first())
-
-        // When: Starting session
-        sessionRepository.startSession()
-
-        // Then: Session should be active but provider still empty (needs manual update)
-        assert(sessionRepository.isSessionActive)
-        assertNull(loginRepositoryProvider.current.first())
-
-        // When: Manually updating provider with scoped repository
-        val loginRepository = sessionRepository.currentScope?.get<LoginRepository>()
-        loginRepositoryProvider.update(loginRepository)
-
-        // Then: Provider should contain the repository
-        assertEquals(loginRepository, loginRepositoryProvider.current.first())
-
-        // When: Ending session
-        sessionRepository.endSession()
-
-        // Then: Provider should be cleared and session inactive
-        assertNull(loginRepositoryProvider.current.first())
-        assertFalse(sessionRepository.isSessionActive)
     }
 
     @Test
