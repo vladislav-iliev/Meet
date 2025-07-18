@@ -20,7 +20,6 @@ class ModulesTest {
     fun `verify appModule configuration`() {
         appModule.verify(
             injections = injectedParameters(
-                definition<OkHttpClient>(Function0::class),
                 definition<SessionRepository>(Koin::class),
                 definition<LoginRepository>(CoroutineDispatcher::class, CognitoControllerApi::class),
                 definition<LoginRepositoryTimer>(Function0::class, Long::class),

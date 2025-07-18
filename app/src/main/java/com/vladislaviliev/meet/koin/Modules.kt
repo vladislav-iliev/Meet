@@ -13,19 +13,25 @@ import kotlinx.coroutines.SupervisorJob
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import org.koin.core.module.dsl.singleOf
-import org.koin.dsl.bind
+import org.koin.dsl.binds
 import org.koin.dsl.module
 import org.openapitools.client.apis.CognitoControllerApi
 
 val appModule = module {
     single { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 
-    single<OkHttpClient> { Client(get()) {}.instance } bind Call.Factory::class
-
     singleOf(::LoginRepositoryProvider)
     single { SessionRepository(getKoin()) }
 
     singleOf(::TokenParser)
+
+    single<OkHttpClient> {
+        val quit: () -> Unit = {
+            get<LoginRepositoryProvider>().update(null)
+            get<SessionRepository>().endSession()
+        }
+        Client(get(), quit).instance
+    } binds arrayOf(Call.Factory::class)
 
     scope<Session> {
         scoped {
