@@ -4,11 +4,11 @@ import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvide
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
-internal class Client(loginRepositoryProvider: LoginRepositoryProvider) {
+internal class Client(loginRepositoryProvider: LoginRepositoryProvider, quit: () -> Unit) {
 
     val instance: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
-        .addInterceptor(AuthInterceptor { loginRepositoryProvider.current.value })
-        .authenticator(Authenticator { loginRepositoryProvider.current.value })
+        .addInterceptor(AuthInterceptor(loginRepositoryProvider.current::value))
+        .authenticator(Authenticator(loginRepositoryProvider.current::value, quit))
         .build()
 }

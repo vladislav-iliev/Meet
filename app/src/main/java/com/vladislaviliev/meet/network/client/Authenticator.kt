@@ -7,7 +7,10 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
 
-internal class Authenticator(private val loginRepository: () -> LoginRepository?) : Authenticator {
+internal class Authenticator(
+    private val loginRepository: () -> LoginRepository?,
+    private val quit: () -> Unit
+) : Authenticator {
 
     private fun priorResponsesCount(response: Response) = generateSequence(response) { it.priorResponse }.count()
 
@@ -18,14 +21,14 @@ internal class Authenticator(private val loginRepository: () -> LoginRepository?
         }
 
         if (1 < priorResponsesCount(response) && 401 == response.priorResponse?.code) { // quit after 2 401s: 1 token expiry + 1 failed refresh)
-            loginRepository.clear()
+            quit()
             return null
         }
 
         loginRepository.refreshSync()
         val newTokens = loginRepository.tokens.value
         if (newTokens.isBlank) {
-            loginRepository.clear()
+            quit()
             return null
         }
 

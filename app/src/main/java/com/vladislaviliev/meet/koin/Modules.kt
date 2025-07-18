@@ -20,7 +20,7 @@ import org.openapitools.client.apis.CognitoControllerApi
 val appModule = module {
     single { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 
-    single<OkHttpClient> { Client(get()).instance } binds arrayOf(Call.Factory::class)
+    single<OkHttpClient> { Client(get()) {}.instance } binds arrayOf(Call.Factory::class)
 
     singleOf(::LoginRepositoryProvider)
     single { SessionRepository(getKoin(), get(), get()) }

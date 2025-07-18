@@ -24,13 +24,13 @@ import kotlin.test.assertNull
 class ClientIntegrationTest {
 
     private val loginRepositoryProvider = LoginRepositoryProvider()
+    private val mockQuit = mockk<() -> Unit>(relaxed = true)
     private val mockChain = mockk<Interceptor.Chain>()
     private val mockRoute = mockk<Route>()
 
     private fun createMockLoginRepository(tokens: Tokens) = mockk<LoginRepository> {
         every { this@mockk.tokens.value } returns tokens
         every { refreshSync() } just Runs
-        every { clear() } just Runs
     }
 
     @Test
@@ -85,7 +85,7 @@ class ClientIntegrationTest {
         val initialRepository = createMockLoginRepository(initialTokens)
         val updatedRepository = createMockLoginRepository(updatedTokens)
 
-        val authenticator = Authenticator { loginRepositoryProvider.current.value }
+        val authenticator = Authenticator(loginRepositoryProvider.current::value, mockQuit)
 
         val originalRequest = Request.Builder()
             .url("https://example.com/test")
@@ -143,7 +143,7 @@ class ClientIntegrationTest {
     fun `test Authenticator handles null LoginRepository`() = runTest {
         loginRepositoryProvider.update(null)
 
-        val authenticator = Authenticator { loginRepositoryProvider.current.value }
+        val authenticator = Authenticator(loginRepositoryProvider.current::value, mockQuit)
 
         val originalRequest = Request.Builder()
             .url("https://example.com/test")
@@ -162,17 +162,14 @@ class ClientIntegrationTest {
     }
 
     @Test
-    fun `test Authenticator clears repository after multiple 401s`() = runTest {
+    fun `test Authenticator quits after multiple 401s`() = runTest {
         val futureExpiry = System.currentTimeMillis() + 3600000 // 1 hour from now
         val tokens = Tokens("user1", "token", "refresh", futureExpiry)
         val mockRepository = createMockLoginRepository(tokens)
 
-        every { mockRepository.refreshSync() } just Runs
-        every { mockRepository.clear() } just Runs
-
         loginRepositoryProvider.update(mockRepository)
 
-        val authenticator = Authenticator { loginRepositoryProvider.current.value }
+        val authenticator = Authenticator(loginRepositoryProvider.current::value, mockQuit)
 
         val originalRequest = Request.Builder()
             .url("https://example.com/test")
@@ -196,7 +193,7 @@ class ClientIntegrationTest {
         val authenticatedRequest = authenticator.authenticate(mockRoute, currentResponse)
 
         assertNull(authenticatedRequest)
-        verify { mockRepository.clear() }
+        verify { mockQuit() }
     }
 
     @Test

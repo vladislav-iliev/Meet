@@ -18,7 +18,7 @@ class ClientTest {
         every { it.current } returns MutableStateFlow(mockLoginRepository)
     }
 
-    private val okHttpClient = Client(mockLoginRepositoryProvider).instance
+    private val okHttpClient = Client(mockLoginRepositoryProvider) {}.instance
 
     @Test
     fun `Client instance creates OkHttpClient with HttpLoggingInterceptor`() {
