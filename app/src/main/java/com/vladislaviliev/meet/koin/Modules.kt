@@ -17,10 +17,13 @@ import org.openapitools.client.apis.CognitoControllerApi
 
 val appModule = module {
     single { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
+
     singleOf(::LoginRepositoryProvider)
-    single<Call.Factory> { Client(get()).instance }
-    singleOf(::TokenParser)
     single { SessionRepository(getKoin(), get()) }
+
+    singleOf(::TokenParser)
+
+    single<Call.Factory> { Client(get()).instance }
 
     scope<Session> {
         scoped {
