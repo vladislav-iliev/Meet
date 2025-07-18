@@ -9,6 +9,12 @@ import org.junit.Test
 class AuthSignTest {
 
     @Test
+    fun `sign doesn't use nullable strings`() {
+        val originalRequest = Request.Builder().url("https://example.com").build()
+        assertNull(originalRequest.sign(null).header(HEADER_AUTH_KEY))
+    }
+
+    @Test
     fun `sign doesn't add empty headers`() {
         val originalRequest =
             Request.Builder().url("https://example.com").header("Existing-Header", "ExistingValue").build()
