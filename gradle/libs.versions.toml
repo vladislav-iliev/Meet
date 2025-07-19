@@ -12,21 +12,23 @@ okhttp = "5.1.0"
 okhttp-logging-interceptor = "5.1.0"
 moshi = "1.15.2"
 
-junit = "4.13.2"
-mockk = "1.14.4"
-kotlinx-coroutines-test = "1.10.2"
+openapi-generator = "7.14.0"
 
 jackson = "2.19.1"
 
 koin-bom = "4.1.0"
 
+material-icons-extended-android = "1.7.8"
+
 paging-runtime = "3.3.6"
 paging-compose = "3.3.6"
 paging-testing = "3.3.6"
 
-androidx-junit = "1.2.1"
+junit = "4.13.2"
+mockk = "1.14.4"
+kotlinx-coroutines-test = "1.10.2"
 
-openapi-generator = "7.14.0"
+androidx-junit = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -56,6 +58,8 @@ koin-androidx-compose-navigation = { group = "io.insert-koin", name = "koin-andr
 paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging-runtime" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging-compose" }
 paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "paging-testing" }
+
+material-icons-extended-android = { group = "androidx.compose.material", name = "material-icons-extended-android", version.ref = "material-icons-extended-android" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }

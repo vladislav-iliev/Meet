@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Meet</string>
+
+    <string name="sign_in_to_your_account">Sign In to Your Account</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="login">Login</string>
 </resources>
