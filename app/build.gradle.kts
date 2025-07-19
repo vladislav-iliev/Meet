@@ -57,6 +57,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -95,6 +96,11 @@ dependencies {
     implementation(libs.paging.compose)
 
     implementation(libs.material.icons.extended.android)
+
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

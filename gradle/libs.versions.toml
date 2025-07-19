@@ -20,6 +20,11 @@ koin-bom = "4.1.0"
 
 material-icons-extended-android = "1.7.8"
 
+desugar-jdk-libs = "2.1.5"
+
+coil-compose = "3.2.0"
+coil-network-okhttp = "3.2.0"
+
 paging-runtime = "3.3.6"
 paging-compose = "3.3.6"
 paging-testing = "3.3.6"
@@ -60,6 +65,11 @@ paging-compose = { group = "androidx.paging", name = "paging-compose", version.r
 paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "paging-testing" }
 
 material-icons-extended-android = { group = "androidx.compose.material", name = "material-icons-extended-android", version.ref = "material-icons-extended-android" }
+
+desugar-jdk-libs = {group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar-jdk-libs"}
+
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil-compose" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil-network-okhttp" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
