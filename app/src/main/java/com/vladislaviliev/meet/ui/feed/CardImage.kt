@@ -16,6 +16,7 @@ internal fun CardImage(uri: String, modifier: Modifier = Modifier) {
         contentDescription = null,
         modifier = modifier.clip(MaterialTheme.shapes.small),
         contentScale = ContentScale.FillWidth,
-        placeholder = painterResource(R.drawable.ic_launcher_background)
+        placeholder = painterResource(R.drawable.ic_launcher_background),
+        error = painterResource(R.drawable.ic_launcher_background)
     )
 }

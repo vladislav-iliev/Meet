@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
@@ -41,7 +40,8 @@ private fun Avatar(uri: String, modifier: Modifier = Modifier) {
         modifier = modifier
             .size(48.dp)
             .clip(MaterialTheme.shapes.medium),
-        placeholder = painterResource(R.drawable.ic_launcher_background)
+        placeholder = painterResource(R.drawable.ic_launcher_background),
+        error = painterResource(R.drawable.ic_launcher_background)
     )
 }
 
