@@ -25,13 +25,7 @@ val appModule = module {
 
     singleOf(::TokenParser)
 
-    single<OkHttpClient> {
-        val quit: () -> Unit = {
-            get<LoginRepositoryProvider>().update(null)
-            get<SessionRepository>().endSession()
-        }
-        Client(get(), quit).instance
-    } binds arrayOf(Call.Factory::class)
+    single<OkHttpClient> { Client(get()).instance } binds arrayOf(Call.Factory::class)
 
     scope<Session> {
         scoped {

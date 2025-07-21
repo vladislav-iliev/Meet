@@ -4,7 +4,6 @@ import com.vladislaviliev.meet.network.repositories.login.LoginRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.SessionRepository
 import kotlinx.coroutines.CoroutineDispatcher
-import okhttp3.OkHttpClient
 import org.junit.Test
 import org.koin.core.Koin
 import org.koin.core.annotation.KoinExperimentalAPI

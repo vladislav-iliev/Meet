@@ -1,11 +1,10 @@
 package com.vladislaviliev.meet.network.client
 
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
-import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 
-internal class Client(loginRepositoryProvider: LoginRepositoryProvider, quit: () -> Unit) {
+internal class Client(loginRepositoryProvider: LoginRepositoryProvider) {
 
     val instance = run {
         val dispatcher = OkHttpClient.Builder()
@@ -14,12 +13,7 @@ internal class Client(loginRepositoryProvider: LoginRepositoryProvider, quit: ()
             .dispatcher(dispatcher)
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
             .addInterceptor(AuthInterceptor(loginRepositoryProvider.current::value))
-            .authenticator(Authenticator(loginRepositoryProvider.current::value, wrapQuit(quit, dispatcher)))
+            .authenticator(Authenticator(loginRepositoryProvider.current::value))
             .build()
-    }
-
-    private fun wrapQuit(quit: () -> Unit, dispatcher: Dispatcher) = {
-        dispatcher.cancelAll()
-        quit()
     }
 }

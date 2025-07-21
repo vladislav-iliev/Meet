@@ -18,8 +18,7 @@ import org.junit.Test
 class AuthenticatorTest {
 
     private val mockLoginRepository = mockk<LoginRepository>(relaxed = true)
-    private val mockQuit = mockk<() -> Unit>(relaxed = true)
-    private val authenticator = Authenticator({ mockLoginRepository }, mockQuit)
+    private val authenticator = Authenticator { mockLoginRepository }
 
     private val baseRequest = Request.Builder().url("https://example.com").build()
 
@@ -47,47 +46,9 @@ class AuthenticatorTest {
         val result = authenticator.authenticate(null, firstResponse)
 
         verify(exactly = 1) { mockLoginRepository.refreshSync() }
-        verify(exactly = 0) { mockQuit() }
 
         assertNotNull(result)
         assertEquals(String.format(HEADER_AUTH_VALUE, NEW_ACCESS_TOKEN), result!!.header(HEADER_AUTH_KEY))
-    }
-
-    @Test
-    fun `authenticate when first response is 401 and refresh fails should quit`() {
-        val tokensFlow =
-            MutableStateFlow(Tokens(TEST_USER_ID, TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME))
-
-        every { mockLoginRepository.tokens } returns tokensFlow
-        every { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = Tokens.BLANK }
-
-        val firstResponse = mockk<Response>()
-        every { firstResponse.priorResponse } returns null
-        every { firstResponse.request } returns baseRequest
-
-        val result = authenticator.authenticate(null, firstResponse)
-
-        verify(exactly = 1) { mockLoginRepository.refreshSync() }
-        verify(exactly = 1) { mockQuit() }
-        assertNull(result)
-    }
-
-    @Test
-    fun `authenticate when second consecutive response is 401 should quit and not refresh`() {
-        val first401Response = mockk<Response>()
-        val second401Response = mockk<Response>()
-
-        every { first401Response.code } returns 401
-        every { first401Response.priorResponse } returns null
-
-        every { second401Response.priorResponse } returns first401Response
-        every { second401Response.request } returns baseRequest
-
-        val result = authenticator.authenticate(null, second401Response)
-
-        verify(exactly = 1) { mockQuit() }
-        verify(exactly = 0) { mockLoginRepository.refreshSync() }
-        assertNull(result)
     }
 
     @Test
@@ -112,14 +73,13 @@ class AuthenticatorTest {
         val result = authenticator.authenticate(null, current401Response)
 
         verify(exactly = 1) { mockLoginRepository.refreshSync() }
-        verify(exactly = 0) { mockQuit() }
         assertNotNull(result)
         assertEquals(String.format(HEADER_AUTH_VALUE, NEW_ACCESS_TOKEN), result!!.header(HEADER_AUTH_KEY))
     }
 
     @Test
     fun `authenticate when repository is null should return null`() {
-        val authenticatorWithNullRepo = Authenticator({ null }) { }
+        val authenticatorWithNullRepo = Authenticator { null }
 
         val response = mockk<Response>()
         every { response.priorResponse } returns null

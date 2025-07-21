@@ -24,7 +24,6 @@ import kotlin.test.assertNull
 class ClientIntegrationTest {
 
     private val loginRepositoryProvider = LoginRepositoryProvider()
-    private val mockQuit = mockk<() -> Unit>(relaxed = true)
     private val mockChain = mockk<Interceptor.Chain>()
     private val mockRoute = mockk<Route>()
 
@@ -85,7 +84,7 @@ class ClientIntegrationTest {
         val initialRepository = createMockLoginRepository(initialTokens)
         val updatedRepository = createMockLoginRepository(updatedTokens)
 
-        val authenticator = Authenticator(loginRepositoryProvider.current::value, mockQuit)
+        val authenticator = Authenticator(loginRepositoryProvider.current::value)
 
         val originalRequest = Request.Builder()
             .url("https://example.com/test")
@@ -143,7 +142,7 @@ class ClientIntegrationTest {
     fun `test Authenticator handles null LoginRepository`() = runTest {
         loginRepositoryProvider.update(null)
 
-        val authenticator = Authenticator(loginRepositoryProvider.current::value, mockQuit)
+        val authenticator = Authenticator(loginRepositoryProvider.current::value)
 
         val originalRequest = Request.Builder()
             .url("https://example.com/test")
@@ -159,41 +158,6 @@ class ClientIntegrationTest {
         val authenticatedRequest = authenticator.authenticate(mockRoute, unauthorizedResponse)
 
         assertNull(authenticatedRequest)
-    }
-
-    @Test
-    fun `test Authenticator quits after multiple 401s`() = runTest {
-        val futureExpiry = System.currentTimeMillis() + 3600000 // 1 hour from now
-        val tokens = Tokens("user1", "token", "refresh", futureExpiry)
-        val mockRepository = createMockLoginRepository(tokens)
-
-        loginRepositoryProvider.update(mockRepository)
-
-        val authenticator = Authenticator(loginRepositoryProvider.current::value, mockQuit)
-
-        val originalRequest = Request.Builder()
-            .url("https://example.com/test")
-            .build()
-
-        val priorResponse = Response.Builder()
-            .request(originalRequest)
-            .protocol(Protocol.HTTP_1_1)
-            .code(401)
-            .message("Unauthorized")
-            .build()
-
-        val currentResponse = Response.Builder()
-            .request(originalRequest)
-            .protocol(Protocol.HTTP_1_1)
-            .code(401)
-            .message("Unauthorized")
-            .priorResponse(priorResponse)
-            .build()
-
-        val authenticatedRequest = authenticator.authenticate(mockRoute, currentResponse)
-
-        assertNull(authenticatedRequest)
-        verify { mockQuit() }
     }
 
     @Test
