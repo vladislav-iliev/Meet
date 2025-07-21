@@ -39,4 +39,18 @@
     <string name="confirm_location">Confirm location</string>
 
     <string name="free">Free</string>
+
+    <string name="join">Join</string>
+    <string name="send">Send</string>
+
+    <string name="back">Back</string>
+
+    <string name="you_will_have_to_confirm_your_attendance">You will have to confirm your attendance once you reach the destination via the app. Failing to do so may result in being marked as a no-show.</string>
+
+    <string name="everyone_can_join_the_event">Everyone can join the event</string>
+    <string name="only_invited_people_can_join">Only invited people can join</string>
+
+    <string name="no_payment_required">No payment required</string>
+    <string name="payment_required">Payment required</string>
+
 </resources>
