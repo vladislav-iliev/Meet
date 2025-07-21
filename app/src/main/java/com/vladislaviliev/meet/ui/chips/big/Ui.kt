@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.vladislaviliev.meet.ui.event.EventProfilePics
 
 @Composable
 private fun BigChip(
@@ -46,4 +47,8 @@ private fun BigChip(
 internal fun BigChip(data: BigChipData, modifier: Modifier = Modifier, outlined: Boolean = false) {
     BigChip(data, { Text(data.description, style = MaterialTheme.typography.bodyMedium) }, modifier, outlined)
 }
+
+@Composable
+internal fun BigChipParticipants(data: BigChipData, uris: Iterable<String>, modifier: Modifier = Modifier) {
+    BigChip(data, { EventProfilePics(uris) }, modifier)
 }

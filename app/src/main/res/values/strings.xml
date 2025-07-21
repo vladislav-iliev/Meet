@@ -38,6 +38,9 @@
     <string name="_public">Public</string>
     <string name="confirm_location">Confirm location</string>
 
+    <string name="description">Description</string>
+    <string name="interests">Interests</string>
+
     <string name="free">Free</string>
 
     <string name="join">Join</string>

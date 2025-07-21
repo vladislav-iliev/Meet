@@ -2,4 +2,5 @@
 <resources>
     <dimen name="feed_list_padding">8dp</dimen>
     <dimen name="feed_card_padding">16dp</dimen>
+    <dimen name="event_section_header_spacer">20dp</dimen>
 </resources>
