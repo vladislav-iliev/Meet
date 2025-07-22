@@ -3,7 +3,6 @@ package com.vladislaviliev.meet.koin
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.SessionRepository
 import junit.framework.TestCase.assertFalse
-import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
