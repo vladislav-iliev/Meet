@@ -13,5 +13,5 @@ internal fun SessionScreen(onSessionRestarted: () -> Unit) {
         onSessionRestarted()
         return
     }
-    LoadingScreen()
+    LoadingScreen({}, LoadingState.Loading)
 }

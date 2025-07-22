@@ -57,5 +57,6 @@
     <string name="payment_required">Payment required</string>
 
     <string name="loading">Loading</string>
+    <string name="retry">Retry</string>
 
 </resources>
