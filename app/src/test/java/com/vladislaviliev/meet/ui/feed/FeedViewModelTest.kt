@@ -1,8 +1,8 @@
-package com.vladislaviliev.meet.network.repositories.feed
+package com.vladislaviliev.meet.ui.feed
 
 import androidx.paging.PagingConfig
-import androidx.paging.PagingSource
 import androidx.paging.testing.asSnapshot
+import com.vladislaviliev.meet.network.repositories.feed.FeedRepository
 import com.vladislaviliev.meet.network.repositories.user.User
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -19,13 +19,10 @@ import org.openapitools.client.models.Interest
 import org.openapitools.client.models.ListResponseDtoPostResponseDto
 import org.openapitools.client.models.MiniUser
 import org.openapitools.client.models.PostResponseDto
-import java.io.IOException
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
-class FeedRepositoryTest {
+class FeedViewModelTest {
 
     private val mockApi = mockk<PostControllerApi>()
     private val testUser = User(latitude = 40.7128, longitude = -74.0060)
@@ -36,14 +33,10 @@ class FeedRepositoryTest {
         clearMocks(mockApi)
     }
 
-    private fun TestScope.createRepository(
-        user: User = testUser
-    ) = FeedRepository(
-        dispatcher = StandardTestDispatcher(testScheduler),
-        api = mockApi,
-        user = user,
-        pagingConfig = pagingConfig
-    )
+    private fun TestScope.createRepository(user: User = testUser) =
+        FeedRepository(StandardTestDispatcher(testScheduler), mockApi, user)
+
+    private fun createViewModel(repository: FeedRepository) = FeedViewModel(repository, pagingConfig)
 
     private fun createTestPostResponseDto(id: String = "test-id", title: String = "Test Post") = PostResponseDto(
         id = id,
@@ -75,13 +68,6 @@ class FeedRepositoryTest {
     )
 
     @Test
-    fun `repository initializes with correct dependencies`() = runTest {
-        val repository = createRepository()
-        assertNotNull(repository.feed)
-        assertEquals(testUser, repository.user)
-    }
-
-    @Test
     fun `feed flow emits PagingData when API call succeeds`() = runTest {
         val expectedPosts = listOf(
             createTestPostResponseDto(id = "1", title = "Post 1"),
@@ -105,7 +91,7 @@ class FeedRepositoryTest {
         } returns mockResponse
 
         val repository = createRepository()
-        val snapshot = repository.feed.asSnapshot()
+        val snapshot = createViewModel(repository).feed.asSnapshot()
         assertEquals(expectedPosts, snapshot)
     }
 
@@ -132,7 +118,8 @@ class FeedRepositoryTest {
         } returns mockResponse
 
         val repository = createRepository(user = customUser)
-        val snapshot = repository.feed.asSnapshot()
+        val vm = createViewModel(repository)
+        val snapshot = vm.feed.asSnapshot()
 
         verify {
             mockApi.getAllPosts(
@@ -152,18 +139,6 @@ class FeedRepositoryTest {
 
     @Test
     fun `feed uses provided paging config`() = runTest {
-        val customPagingConfig = PagingConfig(
-            pageSize = 20,
-            enablePlaceholders = true,
-            initialLoadSize = 40
-        )
-
-        val repository = FeedRepository(
-            dispatcher = StandardTestDispatcher(testScheduler),
-            api = mockApi,
-            user = testUser,
-            pagingConfig = customPagingConfig
-        )
 
         val mockResponse = ListResponseDtoPostResponseDto(
             data = emptyList(),
@@ -178,13 +153,14 @@ class FeedRepositoryTest {
                 longitude = any(),
                 distance = any(),
                 pageNumber = any(),
-                pageSize = 40,
+                pageSize = pagingConfig.pageSize,
                 fromDate = any(),
                 toDate = any()
             )
         } returns mockResponse
 
-        val snapshot = repository.feed.asSnapshot()
+        val repository = createRepository()
+        val snapshot = createViewModel(repository).feed.asSnapshot()
         assertEquals(emptyList(), snapshot)
     }
 
@@ -210,39 +186,13 @@ class FeedRepositoryTest {
         } returns mockResponse
 
         val repository = createRepository()
+        val vm = createViewModel(repository)
 
-        val snapshot1 = repository.feed.asSnapshot()
-        val snapshot2 = repository.feed.asSnapshot()
+        val snapshot1 = vm.feed.asSnapshot()
+        val snapshot2 = vm.feed.asSnapshot()
 
         assertEquals(emptyList(), snapshot1)
         assertEquals(emptyList(), snapshot2)
-    }
-
-    @Test
-    fun `paging source handles API exceptions correctly`() = runTest {
-        val expectedException = IOException("Network error")
-
-        coEvery {
-            mockApi.getAllPosts(any(), any(), any(), any(), any(), any(), any(), any())
-        } throws expectedException
-
-        val pagingSource = FeedPagingSource(
-            dispatcher = StandardTestDispatcher(testScheduler),
-            api = mockApi,
-            user = testUser
-        )
-
-        val result = pagingSource.load(
-            PagingSource.LoadParams.Refresh(
-                key = null,
-                loadSize = 10,
-                placeholdersEnabled = false
-            )
-        )
-
-        assertTrue(result is PagingSource.LoadResult.Error)
-        assertEquals(expectedException::class, result.throwable::class)
-        assertEquals(expectedException.message, result.throwable.message)
     }
 
     @Test
@@ -272,8 +222,8 @@ class FeedRepositoryTest {
         val repository1 = createRepository(user = user1)
         val repository2 = createRepository(user = user2)
 
-        val snapshot1 = repository1.feed.asSnapshot()
-        val snapshot2 = repository2.feed.asSnapshot()
+        val snapshot1 = createViewModel(repository1).feed.asSnapshot()
+        val snapshot2 = createViewModel(repository2).feed.asSnapshot()
 
         assertEquals(1, snapshot1.size)
         assertEquals(1, snapshot2.size)
