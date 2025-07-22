@@ -3,10 +3,8 @@ package com.vladislaviliev.meet.network.client
 import com.vladislaviliev.meet.network.Tokens
 import com.vladislaviliev.meet.network.repositories.login.LoginRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
-import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -29,7 +27,7 @@ class ClientIntegrationTest {
 
     private fun createMockLoginRepository(tokens: Tokens) = mockk<LoginRepository> {
         every { this@mockk.tokens.value } returns tokens
-        every { refreshSync() } just Runs
+        every { refreshSync() } returns Result.success(Unit)
     }
 
     @Test

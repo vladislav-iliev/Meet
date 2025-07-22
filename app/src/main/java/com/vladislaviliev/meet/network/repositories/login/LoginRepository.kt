@@ -6,7 +6,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.openapitools.client.apis.CognitoControllerApi
 
 internal class LoginRepository(
@@ -37,18 +37,17 @@ internal class LoginRepository(
         _tokens.value = tokens
     }
 
-    fun loginAsync(username: String, password: String) {
-        scope.launch(dispatcher) { loginSync(username, password) }
-    }
+    suspend fun loginDispatched(username: String, password: String) =
+        withContext(dispatcher) { loginSync(username, password) }
 
-    fun refreshSync() {
+    fun refreshSync(): Result<Unit> {
         val refreshToken = tokens.value.refresh
         val userId = tokens.value.userId
 
         val response = runCatching { api.refreshToken(refreshToken, userId) }
         if (response.isFailure) {
             _tokens.value = Tokens.BLANK
-            return
+            return Result.failure(response.exceptionOrNull()!!)
         }
 
         val responseValue = response.getOrNull()!!
@@ -56,16 +55,15 @@ internal class LoginRepository(
         val expiryParsed = runCatching { parser.parseExpiration(newAccessToken) }
         if (expiryParsed.isFailure) {
             _tokens.value = Tokens.BLANK
-            return
+            return Result.failure(expiryParsed.exceptionOrNull()!!)
         }
 
         val tokens = Tokens(userId, newAccessToken, refreshToken, expiryParsed.getOrNull()!!)
         _tokens.value = tokens
+        return Result.success(Unit)
     }
 
-    fun refreshAsync() {
-        scope.launch(dispatcher) { refreshSync() }
-    }
+    suspend fun refreshDispatched() = withContext(dispatcher) { refreshSync() }
 
     fun clear() {
         _tokens.value = Tokens.BLANK

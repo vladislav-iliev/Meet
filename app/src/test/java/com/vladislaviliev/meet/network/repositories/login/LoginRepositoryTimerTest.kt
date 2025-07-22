@@ -1,9 +1,7 @@
 package com.vladislaviliev.meet.network.repositories.login
 
 import com.vladislaviliev.meet.network.Tokens
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,14 +14,14 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginRepositoryTimerTest {
 
+    private val tokensFlow = MutableStateFlow(Tokens.BLANK)
+    private val repository = mockk<LoginRepository> {
+        every { tokens } returns tokensFlow
+        every { refreshSync() } answers { Result.success(Unit) }
+    }
+
     @Test
     fun `should call refresh after timer runs `() = runTest {
-        val tokensFlow = MutableStateFlow(Tokens.BLANK)
-        val repository = mockk<LoginRepository> {
-            every { tokens } returns tokensFlow
-            every { refreshSync() } just Runs
-        }
-
         val eagerness = 500L
         val tokenExpiry = 1000L
         val advanceTimeBy = tokenExpiry - eagerness + 1L
@@ -40,12 +38,6 @@ class LoginRepositoryTimerTest {
 
     @Test
     fun `should not schedule refresh when tokens are blank`() = runTest {
-        val tokensFlow = MutableStateFlow(Tokens.BLANK)
-        val repository = mockk<LoginRepository> {
-            every { tokens } returns tokensFlow
-            every { refreshSync() } just Runs
-        }
-
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 0L }
         LoginRepositoryTimer(backgroundScope, repository, currentTime, 500L)
 
@@ -57,12 +49,6 @@ class LoginRepositoryTimerTest {
 
     @Test
     fun `should schedule refresh when delay is zero`() = runTest {
-        val tokensFlow = MutableStateFlow(Tokens.BLANK)
-        val repository = mockk<LoginRepository> {
-            every { tokens } returns tokensFlow
-            every { refreshSync() } just Runs
-        }
-
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 500L }
         LoginRepositoryTimer(backgroundScope, repository, currentTime, 500L)
 
@@ -75,12 +61,6 @@ class LoginRepositoryTimerTest {
 
     @Test
     fun `should not schedule refresh when delay is negative`() = runTest {
-        val tokensFlow = MutableStateFlow(Tokens.BLANK)
-        val repository = mockk<LoginRepository> {
-            every { tokens } returns tokensFlow
-            every { refreshSync() } just Runs
-        }
-
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 600L }
         LoginRepositoryTimer(backgroundScope, repository, currentTime, 500L)
 
@@ -93,12 +73,6 @@ class LoginRepositoryTimerTest {
 
     @Test
     fun `should cancel previous refresh job when new tokens are received`() = runTest {
-        val tokensFlow = MutableStateFlow(Tokens.BLANK)
-        val repository = mockk<LoginRepository> {
-            every { tokens } returns tokensFlow
-            every { refreshSync() } just Runs
-        }
-
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returnsMany listOf(0L, 1000L, 2000L) }
         LoginRepositoryTimer(backgroundScope, repository, currentTime, 500L)
 
@@ -121,12 +95,6 @@ class LoginRepositoryTimerTest {
 
     @Test
     fun `should cancel refresh job when tokens become blank`() = runTest {
-        val tokensFlow = MutableStateFlow(Tokens.BLANK)
-        val repository = mockk<LoginRepository> {
-            every { tokens } returns tokensFlow
-            every { refreshSync() } just Runs
-        }
-
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 0L }
         LoginRepositoryTimer(backgroundScope, repository, currentTime, 500L)
 
@@ -143,12 +111,6 @@ class LoginRepositoryTimerTest {
 
     @Test
     fun `should not call refresh before delay time`() = runTest {
-        val tokensFlow = MutableStateFlow(Tokens.BLANK)
-        val repository = mockk<LoginRepository> {
-            every { tokens } returns tokensFlow
-            every { refreshSync() } just Runs
-        }
-
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returns 0L }
 
         LoginRepositoryTimer(backgroundScope, repository, currentTime, 500L)
@@ -162,12 +124,6 @@ class LoginRepositoryTimerTest {
 
     @Test
     fun `should handle multiple token updates correctly`() = runTest {
-        val tokensFlow = MutableStateFlow(Tokens.BLANK)
-        val repository = mockk<LoginRepository> {
-            every { tokens } returns tokensFlow
-            every { refreshSync() } just Runs
-        }
-
         val currentTime = mockk<() -> Long> { every { this@mockk.invoke() } returnsMany listOf(0L, 500, 1500L) }
         LoginRepositoryTimer(backgroundScope, repository, currentTime, 500L)
 

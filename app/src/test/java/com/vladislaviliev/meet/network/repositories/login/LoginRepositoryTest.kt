@@ -37,23 +37,26 @@ class LoginRepositoryTest {
         const val NEW_EXPIRATION_TIME = 9876543210L
     }
 
-    private fun TestScope.performInitialLogin(repository: LoginRepository) {
+    private fun TestScope.createRepository() =
+        LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+
+    private suspend fun TestScope.performInitialLogin(repository: LoginRepository) {
         val mockLoginResponse = LoginResponseDTO(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_USER_ID)
         coEvery { mockApi.login(any(), any()) } returns mockLoginResponse
         every { mockTokenParser.parseExpiration(TEST_ACCESS_TOKEN) } returns TEST_EXPIRATION_TIME
-        repository.loginAsync(TEST_USERNAME, TEST_PASSWORD)
+        repository.loginDispatched(TEST_USERNAME, TEST_PASSWORD)
         advanceUntilIdle()
     }
 
     @Test
-    fun `loginAsync success emits correct tokens to StateFlow`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+    fun `loginDispatched success emits correct tokens to StateFlow`() = runTest {
+        val repository = createRepository()
         val mockLoginResponse = LoginResponseDTO(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_USER_ID)
 
         coEvery { mockApi.login(TEST_USERNAME, TEST_PASSWORD) } returns mockLoginResponse
         every { mockTokenParser.parseExpiration(TEST_ACCESS_TOKEN) } returns TEST_EXPIRATION_TIME
 
-        repository.loginAsync(TEST_USERNAME, TEST_PASSWORD)
+        repository.loginDispatched(TEST_USERNAME, TEST_PASSWORD)
         advanceUntilIdle()
 
         val expectedTokens = Tokens(TEST_USER_ID, TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
@@ -64,13 +67,13 @@ class LoginRepositoryTest {
     }
 
     @Test
-    fun `loginAsync failure emits blank tokens to StateFlow`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+    fun `loginDispatched failure emits blank tokens to StateFlow`() = runTest {
+        val repository = createRepository()
         val expectedException = ClientException("Client error", 400, null)
 
         coEvery { mockApi.login(TEST_USERNAME, TEST_PASSWORD) } throws expectedException
 
-        repository.loginAsync(TEST_USERNAME, TEST_PASSWORD)
+        repository.loginDispatched(TEST_USERNAME, TEST_PASSWORD)
         advanceUntilIdle()
 
         assertEquals(Tokens.BLANK, repository.tokens.value)
@@ -81,14 +84,14 @@ class LoginRepositoryTest {
 
     @Test
     fun `login failure during token parsing emits blank tokens to StateFlow`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+        val repository = createRepository()
         val mockLoginResponse = LoginResponseDTO(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_USER_ID)
         val expectedException = RuntimeException("Token parsing failed")
 
         coEvery { mockApi.login(TEST_USERNAME, TEST_PASSWORD) } returns mockLoginResponse
         every { mockTokenParser.parseExpiration(TEST_ACCESS_TOKEN) } throws expectedException
 
-        repository.loginAsync(TEST_USERNAME, TEST_PASSWORD)
+        repository.loginDispatched(TEST_USERNAME, TEST_PASSWORD)
         advanceUntilIdle()
 
         assertEquals(Tokens.BLANK, repository.tokens.value)
@@ -98,8 +101,8 @@ class LoginRepositoryTest {
     }
 
     @Test
-    fun `refreshAsync success emits updated tokens to StateFlow`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+    fun `refreshDispatched success emits updated tokens to StateFlow`() = runTest {
+        val repository = createRepository()
 
         performInitialLogin(repository)
 
@@ -107,7 +110,7 @@ class LoginRepositoryTest {
         coEvery { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) } returns mockRefreshResponse
         every { mockTokenParser.parseExpiration(NEW_ACCESS_TOKEN) } returns NEW_EXPIRATION_TIME
 
-        repository.refreshAsync()
+        repository.refreshDispatched()
         advanceUntilIdle()
 
         val expectedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, NEW_EXPIRATION_TIME)
@@ -118,15 +121,15 @@ class LoginRepositoryTest {
     }
 
     @Test
-    fun `refreshAsync with blank tokens tries to refresh with blank values`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+    fun `refreshDispatched with blank tokens tries to refresh with blank values`() = runTest {
+        val repository = createRepository()
 
         assertEquals(Tokens.BLANK, repository.tokens.value)
 
         coEvery { mockApi.refreshToken(Tokens.BLANK.refresh, Tokens.BLANK.userId) } throws
                 ClientException("Invalid token", 400, null)
 
-        repository.refreshAsync()
+        repository.refreshDispatched()
         advanceUntilIdle()
 
         assertEquals(Tokens.BLANK, repository.tokens.value)
@@ -136,8 +139,8 @@ class LoginRepositoryTest {
     }
 
     @Test
-    fun `refreshAsync failure on API call emits blank tokens to StateFlow`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+    fun `refreshDispatched failure on API call emits blank tokens to StateFlow`() = runTest {
+        val repository = createRepository()
 
         performInitialLogin(repository)
         clearMocks(mockTokenParser, answers = false)
@@ -145,7 +148,7 @@ class LoginRepositoryTest {
         val expectedException = ClientException("API error", 500, null)
         coEvery { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) } throws expectedException
 
-        repository.refreshAsync()
+        repository.refreshDispatched()
         advanceUntilIdle()
 
         assertEquals(Tokens.BLANK, repository.tokens.value)
@@ -155,8 +158,8 @@ class LoginRepositoryTest {
     }
 
     @Test
-    fun `refreshAsync failure on token parsing emits blank tokens to StateFlow`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+    fun `refreshDispatched failure on token parsing emits blank tokens to StateFlow`() = runTest {
+        val repository = createRepository()
 
         performInitialLogin(repository)
 
@@ -166,7 +169,7 @@ class LoginRepositoryTest {
         coEvery { mockApi.refreshToken(TEST_REFRESH_TOKEN, TEST_USER_ID) } returns mockRefreshResponse
         every { mockTokenParser.parseExpiration(NEW_ACCESS_TOKEN) } throws expectedException
 
-        repository.refreshAsync()
+        repository.refreshDispatched()
         advanceUntilIdle()
 
         assertEquals(Tokens.BLANK, repository.tokens.value)
@@ -177,7 +180,7 @@ class LoginRepositoryTest {
 
     @Test
     fun `refreshSync success updates tokens`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+        val repository = createRepository()
 
         performInitialLogin(repository)
 
@@ -196,7 +199,7 @@ class LoginRepositoryTest {
 
     @Test
     fun `refreshSync failure on API call emits blank tokens`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+        val repository = createRepository()
 
         performInitialLogin(repository)
         clearMocks(mockTokenParser, answers = false)
@@ -214,7 +217,7 @@ class LoginRepositoryTest {
 
     @Test
     fun `refreshSync failure on token parsing emits blank tokens`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+        val repository = createRepository()
 
         performInitialLogin(repository)
 
@@ -234,7 +237,7 @@ class LoginRepositoryTest {
 
     @Test
     fun `refreshSync with blank tokens attempts refresh with blank values`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+        val repository = createRepository()
 
         assertEquals(Tokens.BLANK, repository.tokens.value)
 
@@ -251,7 +254,7 @@ class LoginRepositoryTest {
 
     @Test
     fun `clear emits blank tokens to StateFlow`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+        val repository = createRepository()
 
         performInitialLogin(repository)
 
@@ -265,7 +268,7 @@ class LoginRepositoryTest {
 
     @Test
     fun `tokens start blank`() = runTest {
-        val repository = LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+        val repository = createRepository()
         assertEquals(Tokens.BLANK, repository.tokens.value)
     }
 }

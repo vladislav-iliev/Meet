@@ -37,7 +37,10 @@ class AuthenticatorTest {
         val refreshedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
 
         every { mockLoginRepository.tokens } returns tokensFlow
-        every { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = refreshedTokens }
+        every { mockLoginRepository.refreshSync() } coAnswers {
+            tokensFlow.value = refreshedTokens
+            Result.success(Unit)
+        }
 
         val firstResponse = mockk<Response>()
         every { firstResponse.priorResponse } returns null
@@ -58,7 +61,10 @@ class AuthenticatorTest {
         val refreshedTokens = Tokens(TEST_USER_ID, NEW_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_EXPIRATION_TIME)
 
         every { mockLoginRepository.tokens } returns tokensFlow
-        every { mockLoginRepository.refreshSync() } coAnswers { tokensFlow.value = refreshedTokens }
+        every { mockLoginRepository.refreshSync() } coAnswers {
+            tokensFlow.value = refreshedTokens
+            Result.success(Unit)
+        }
 
         val priorNon401Response = mockk<Response>()
         val current401Response = mockk<Response>()
