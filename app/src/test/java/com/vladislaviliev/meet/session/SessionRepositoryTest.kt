@@ -15,14 +15,14 @@ class SessionRepositoryTest {
     @Test
     fun `initial state has no active session`() {
         assertNull(sessionRepository.currentScope)
-        assertFalse(sessionRepository.isSessionActive)
+        assertFalse(sessionRepository.isSessionActive.value)
     }
 
     @Test
     fun `restartSession creates new scope and sets session as active`() {
         sessionRepository.restartSession()
         assertNotNull(sessionRepository.currentScope)
-        assertTrue(sessionRepository.isSessionActive)
+        assertTrue(sessionRepository.isSessionActive.value)
     }
 
     @Test
@@ -34,7 +34,7 @@ class SessionRepositoryTest {
         val secondScope = sessionRepository.currentScope
 
         assertNotEquals(firstScope, secondScope)
-        assertTrue(sessionRepository.isSessionActive)
+        assertTrue(sessionRepository.isSessionActive.value)
     }
 
     @Test
@@ -43,7 +43,7 @@ class SessionRepositoryTest {
         sessionRepository.endSession()
 
         assertNull(sessionRepository.currentScope)
-        assertFalse(sessionRepository.isSessionActive)
+        assertFalse(sessionRepository.isSessionActive.value)
     }
 
     @Test
@@ -51,7 +51,7 @@ class SessionRepositoryTest {
         sessionRepository.endSession()
 
         assertNull(sessionRepository.currentScope)
-        assertFalse(sessionRepository.isSessionActive)
+        assertFalse(sessionRepository.isSessionActive.value)
     }
 
     @Test
@@ -60,6 +60,6 @@ class SessionRepositoryTest {
         sessionRepository.endSession()
         sessionRepository.endSession()
         assertNull(sessionRepository.currentScope)
-        assertFalse(sessionRepository.isSessionActive)
+        assertFalse(sessionRepository.isSessionActive.value)
     }
 }

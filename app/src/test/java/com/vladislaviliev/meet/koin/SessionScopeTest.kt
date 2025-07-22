@@ -3,6 +3,7 @@ package com.vladislaviliev.meet.koin
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.SessionRepository
 import junit.framework.TestCase.assertFalse
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -63,19 +64,19 @@ class SessionScopeTest : KoinTest {
     @Test
     fun `Session scope is properly managed by SessionRepository`() {
         // Given: No active session
-        assertTrue(!sessionRepository.isSessionActive)
+        assertTrue(!sessionRepository.isSessionActive.value)
 
         // When: Session is started
         sessionRepository.restartSession()
 
         // Then: Session should be active and scope should be available
-        assertTrue(sessionRepository.isSessionActive)
+        assertTrue(sessionRepository.isSessionActive.value)
         assertNotNull(sessionRepository.currentScope)
 
         // When: Session is ended
         sessionRepository.endSession()
 
         // Then: Session should be inactive
-        assertFalse(sessionRepository.isSessionActive)
+        assertFalse(sessionRepository.isSessionActive.value)
     }
 }
