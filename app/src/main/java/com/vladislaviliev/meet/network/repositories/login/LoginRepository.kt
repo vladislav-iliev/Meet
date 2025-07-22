@@ -16,11 +16,11 @@ internal class LoginRepository(
     private val _tokens = MutableStateFlow(Tokens.BLANK)
     val tokens = _tokens.asStateFlow()
 
-    private fun loginSync(username: String, password: String) {
+    private fun loginSync(username: String, password: String): Result<Unit> {
         val response = runCatching { api.login(username, password) }
         if (response.isFailure) {
             _tokens.value = Tokens.BLANK
-            return
+            return Result.failure(response.exceptionOrNull()!!)
         }
 
         val responseValue = response.getOrNull()!!
@@ -28,11 +28,12 @@ internal class LoginRepository(
         val expiryParsed = runCatching { parser.parseExpiration(accessToken) }
         if (expiryParsed.isFailure) {
             _tokens.value = Tokens.BLANK
-            return
+            return Result.failure(expiryParsed.exceptionOrNull()!!)
         }
 
         val tokens = Tokens(responseValue.userId, accessToken, responseValue.refreshToken, expiryParsed.getOrNull()!!)
         _tokens.value = tokens
+        return Result.success(Unit)
     }
 
     suspend fun loginDispatched(username: String, password: String) =
