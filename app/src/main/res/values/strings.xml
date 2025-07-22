@@ -56,4 +56,6 @@
     <string name="no_payment_required">No payment required</string>
     <string name="payment_required">Payment required</string>
 
+    <string name="loading">Loading</string>
+
 </resources>
