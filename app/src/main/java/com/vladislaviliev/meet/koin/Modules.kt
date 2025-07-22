@@ -7,12 +7,14 @@ import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvide
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.Session
 import com.vladislaviliev.meet.session.SessionRepository
+import com.vladislaviliev.meet.ui.loading.SessionViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.binds
 import org.koin.dsl.module
 import org.openapitools.client.apis.CognitoControllerApi
@@ -26,6 +28,8 @@ val appModule = module {
     singleOf(::TokenParser)
 
     single<OkHttpClient> { Client(get()).instance } binds arrayOf(Call.Factory::class)
+
+    viewModelOf(::SessionViewModel)
 
     scope<Session> {
         scoped {

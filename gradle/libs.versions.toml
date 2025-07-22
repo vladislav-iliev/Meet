@@ -25,6 +25,8 @@ desugar-jdk-libs = "2.1.5"
 coil-compose = "3.2.0"
 coil-network-okhttp = "3.2.0"
 
+navigation = "2.9.2"
+
 paging-runtime = "3.3.6"
 paging-compose = "3.3.6"
 paging-testing = "3.3.6"
@@ -34,6 +36,8 @@ mockk = "1.14.4"
 kotlinx-coroutines-test = "1.10.2"
 
 androidx-junit = "1.2.1"
+
+kotlin-serialization = "2.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -71,6 +75,9 @@ desugar-jdk-libs = {group = "com.android.tools", name = "desugar_jdk_libs", vers
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil-compose" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil-network-okhttp" }
 
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
+
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
@@ -87,3 +94,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 openapi-generator = { id = "org.openapi.generator", version.ref = "openapi-generator" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-serialization" }

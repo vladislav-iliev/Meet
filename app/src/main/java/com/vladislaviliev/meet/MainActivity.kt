@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.vladislaviliev.meet.ui.login.LoginScreen
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.vladislaviliev.meet.navigation.createAppGraph
 import com.vladislaviliev.meet.ui.theme.MeetTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,10 +15,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MeetTheme {
-                LoginScreen(
-                    onLoginClicked = { _, _ -> },
-                    onForgotPasswordClicked = {}
-                )
+                val navController = rememberNavController()
+                NavHost(navController, createAppGraph(navController))
             }
         }
     }
