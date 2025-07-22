@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 internal object AppGraphRoute
 
 internal fun createAppGraph(controller: NavController) = controller
-    .createGraph(LoginRoute, AppGraphRoute::class) { addAppGraphDestinations(controller) }
+    .createGraph(SessionRoute, AppGraphRoute::class) { addAppGraphDestinations(controller) }
 
 private fun NavGraphBuilder.addAppGraphDestinations(controller: NavController) {
     addSessionDestination(controller::onSessionRestarted)

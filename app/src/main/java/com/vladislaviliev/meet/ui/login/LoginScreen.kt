@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,16 +41,24 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladislaviliev.meet.R
 import com.vladislaviliev.meet.ui.theme.MeetTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun LoginScreen(onLoggedIn: () -> Unit) {
-    LoginScreen({ _, _ -> })
+    val vm = koinViewModel<LoginViewModel>()
+    val state by vm.state.collectAsStateWithLifecycle()
+    if (state is LoginState.Success) {
+        onLoggedIn()
+        return
+    }
+    LoginScreen(vm::login, state)
 }
 
 @Composable
-internal fun LoginScreen(onLoginClicked: (String, String) -> Unit, modifier: Modifier = Modifier) {
+internal fun LoginScreen(onLoginClicked: (String, String) -> Unit, state: LoginState, modifier: Modifier = Modifier) {
     Surface(modifier) {
         Box(
             Modifier
@@ -59,15 +68,14 @@ internal fun LoginScreen(onLoginClicked: (String, String) -> Unit, modifier: Mod
                 .navigationBarsPadding()
                 .padding(15.dp)
         ) {
-            Contents(onLoginClicked)
+            Contents(onLoginClicked, state)
         }
     }
 }
 
 @Composable
 private fun BoxScope.Contents(
-    onLoginClicked: (String, String) -> Unit,
-    modifier: Modifier = Modifier
+    onLoginClicked: (String, String) -> Unit, state: LoginState, modifier: Modifier = Modifier
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -112,6 +120,9 @@ private fun BoxScope.Contents(
         TextButton({}, Modifier.align(Alignment.CenterHorizontally)) {
             Text(stringResource(R.string.forgot_password))
         }
+
+        Spacer(Modifier.height(16.dp))
+        StateIndicator(state)
     }
     Button(
         { onLoginClicked(email, password) },
@@ -128,10 +139,22 @@ private fun PasswordTrailingIcon(isVisible: Boolean, onClick: () -> Unit) {
     IconButton(onClick) { Icon(image, description) }
 }
 
+@Composable
+private fun StateIndicator(state: LoginState, modifier: Modifier = Modifier) {
+    if (state is LoginState.Idle)
+        return
+    if (state is LoginState.Loading) {
+        CircularProgressIndicator(modifier)
+        return
+    }
+    require(state is LoginState.Error)
+    Text(state.message, modifier, color = MaterialTheme.colorScheme.error)
+}
+
 @Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun LoginScreenPreview() {
     MeetTheme {
-        LoginScreen({ _, _ -> })
+        LoginScreen({ _, _ -> }, LoginState.Idle)
     }
 }

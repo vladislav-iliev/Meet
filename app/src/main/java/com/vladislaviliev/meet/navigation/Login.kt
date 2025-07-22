@@ -14,5 +14,10 @@ internal fun NavGraphBuilder.addLoginDestination(onLoggedIn: () -> Unit) {
 }
 
 internal fun NavController.onLoggedIn() {
-
+    println()
+    println("success")
+    println("success")
+    println("success")
+    println("success")
+    println("success")
 }
