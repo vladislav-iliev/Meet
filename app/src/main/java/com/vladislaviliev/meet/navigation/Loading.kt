@@ -14,5 +14,6 @@ internal fun NavGraphBuilder.addSessionDestination(onSessionRestarted: () -> Uni
 }
 
 internal fun NavController.onSessionRestarted() {
-
+    popBackStack()
+    navigate(LoginRoute)
 }

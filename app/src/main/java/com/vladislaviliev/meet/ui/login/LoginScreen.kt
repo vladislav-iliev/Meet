@@ -44,6 +44,11 @@ import com.vladislaviliev.meet.R
 import com.vladislaviliev.meet.ui.theme.MeetTheme
 
 @Composable
+internal fun LoginScreen(onLoggedIn: () -> Unit) {
+    LoginScreen({ _, _ -> })
+}
+
+@Composable
 internal fun LoginScreen(onLoginClicked: (String, String) -> Unit, modifier: Modifier = Modifier) {
     Surface(modifier) {
         Box(
