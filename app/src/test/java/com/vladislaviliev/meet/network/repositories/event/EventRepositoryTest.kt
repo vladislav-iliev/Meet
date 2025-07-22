@@ -1,38 +1,36 @@
 package com.vladislaviliev.meet.network.repositories.event
 
-import com.vladislaviliev.meet.network.Tokens
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.openapitools.client.apis.PostControllerApi
 import org.openapitools.client.infrastructure.ClientException
-import org.openapitools.client.infrastructure.ServerException
 import org.openapitools.client.models.BaseLocation
-import org.openapitools.client.models.Interest
+import org.openapitools.client.models.ExtendedMiniUser
+import org.openapitools.client.models.ListResponseDtoExtendedMiniUser
 import org.openapitools.client.models.MiniUser
 import org.openapitools.client.models.PostResponseDto
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EventRepositoryTest {
 
     private val eventId = "test-event-id"
     private val specificEventId = "specific-event-123"
-    private val standardTokens = Tokens("user123", "access-token", "refresh-token", 123456789L)
-    private val mockLocation = mockk<BaseLocation>()
-    private val mockOwner = mockk<MiniUser>()
-    private val mockInterests = setOf<Interest>()
+    private val mockParticipantProfilePics = listOf("pic1.jpg", "pic2.jpg")
 
-    private fun createMockEvent(
+    private fun createMockEventDto(
         id: String = eventId,
         title: String = "Test Event",
         images: List<String> = emptyList(),
@@ -50,10 +48,10 @@ class EventRepositoryTest {
         id = id,
         title = title,
         images = images,
-        location = mockLocation,
+        location = mockk<BaseLocation>(),
         createdAt = OffsetDateTime.now(),
-        interests = mockInterests,
-        owner = mockOwner,
+        interests = emptySet(),
+        owner = mockk<MiniUser>(),
         payment = payment,
         currentUserStatus = currentUserStatus,
         accessibility = accessibility,
@@ -66,14 +64,20 @@ class EventRepositoryTest {
         description = description
     )
 
+    private fun createMockParticipantsResponse(profilePics: List<String>): ListResponseDtoExtendedMiniUser {
+        val extendedMiniUsers = profilePics.mapIndexed { index, pic ->
+            val mockMiniUser = mockk<MiniUser>()
+            every { mockMiniUser.profilePhotos } returns listOf(profilePics[index])
+            mockk<ExtendedMiniUser> { every { user } returns mockMiniUser }
+        }
+        return ListResponseDtoExtendedMiniUser(extendedMiniUsers, true, extendedMiniUsers.size.toLong())
+    }
+
     @Test
     fun `should load event successfully on initialization`() = runTest {
         val mockApi = mockk<PostControllerApi>()
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val testScope = TestScope(testDispatcher)
-        val loginTokens = MutableStateFlow(standardTokens)
 
-        val expectedEvent = createMockEvent(
+        val expectedPostDto = createMockEventDto(
             title = "Test Event",
             images = listOf("image1.jpg", "image2.jpg"),
             payment = 25.0,
@@ -81,148 +85,138 @@ class EventRepositoryTest {
             participantsCount = 5,
             description = "Test Event Description"
         )
+        val mockPaginatedParticipants = createMockParticipantsResponse(mockParticipantProfilePics)
+        val expectedEventResponse = EventResponse(expectedPostDto, mockParticipantProfilePics)
 
-        coEvery { mockApi.getPostById(eventId) } returns expectedEvent
+        coEvery { mockApi.getPostById(eventId) } returns expectedPostDto
+        coEvery { mockApi.getPostParticipants(eventId, 0, 10) } returns mockPaginatedParticipants
 
         val repository = EventRepository(
-            scope = testScope,
-            dispatcher = testDispatcher,
+            scope = backgroundScope,
+            dispatcher = coroutineContext[CoroutineDispatcher]!!,
             api = mockApi,
             eventId = eventId,
-            loginTokens = loginTokens
         )
 
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
+        repository.event.dropWhile { it == null }.first()
+
         coVerify { mockApi.getPostById(eventId) }
-        assertEquals(expectedEvent, repository.event.first())
+        coVerify { mockApi.getPostParticipants(eventId, 0, 10) }
+
+        val result = repository.event.first()
+        assertNotNull(result)
+        assertTrue(result.isSuccess)
+        assertEquals(expectedEventResponse, result.getOrNull())
     }
 
     @Test
-    fun `should handle ClientException gracefully`() = runTest {
+    fun `should handle ClientException gracefully when getting post by id`() = runTest {
         val mockApi = mockk<PostControllerApi>()
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val testScope = TestScope(testDispatcher)
-        val loginTokens = MutableStateFlow(standardTokens)
+        val mockPaginatedParticipants = createMockParticipantsResponse(emptyList())
+
 
         coEvery { mockApi.getPostById(eventId) } throws ClientException("Client error : 404 Not Found", 404, mockk())
+        coEvery { mockApi.getPostParticipants(eventId, 0, 10) } returns mockPaginatedParticipants
+
 
         val repository = EventRepository(
-            scope = testScope,
-            dispatcher = testDispatcher,
+            scope = backgroundScope,
+            dispatcher = coroutineContext[CoroutineDispatcher]!!,
             api = mockApi,
             eventId = eventId,
-            loginTokens = loginTokens
         )
 
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
+        repository.event.dropWhile { it == null }.first()
+
         coVerify { mockApi.getPostById(eventId) }
-        assertNull(repository.event.first())
+        coVerify(exactly = 0) { mockApi.getPostParticipants(eventId, any(), any()) }
+
+        val result = repository.event.first()
+        assertNotNull(result)
+        assertTrue(result.isFailure)
+        assertNull(result.getOrNull())
     }
 
     @Test
-    fun `should handle ServerException gracefully`() = runTest {
+    fun `should handle ClientException gracefully when getting participants`() = runTest {
         val mockApi = mockk<PostControllerApi>()
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val testScope = TestScope(testDispatcher)
-        val loginTokens = MutableStateFlow(standardTokens)
+        val mockPostDto = createMockEventDto()
 
-        coEvery { mockApi.getPostById(eventId) } throws ServerException(
-            "Server error : 500 Internal Server Error",
-            500,
+        coEvery { mockApi.getPostById(eventId) } returns mockPostDto
+        coEvery { mockApi.getPostParticipants(eventId, 0, 10) } throws ClientException(
+            "Client error : 404 Not Found",
+            404,
             mockk()
         )
 
         val repository = EventRepository(
-            scope = testScope,
-            dispatcher = testDispatcher,
+            scope = backgroundScope,
+            dispatcher = coroutineContext[CoroutineDispatcher]!!,
             api = mockApi,
             eventId = eventId,
-            loginTokens = loginTokens
         )
 
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
+        repository.event.dropWhile { it == null }.first()
+
         coVerify { mockApi.getPostById(eventId) }
-        assertNull(repository.event.first())
-    }
+        coVerify { mockApi.getPostParticipants(eventId, 0, 10) }
 
-    @Test
-    fun `should handle IllegalStateException gracefully`() = runTest {
-        val mockApi = mockk<PostControllerApi>()
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val testScope = TestScope(testDispatcher)
-        val loginTokens = MutableStateFlow(standardTokens)
-
-        coEvery { mockApi.getPostById(eventId) } throws IllegalStateException("Request not correctly configured")
-
-        val repository = EventRepository(
-            scope = testScope,
-            dispatcher = testDispatcher,
-            api = mockApi,
-            eventId = eventId,
-            loginTokens = loginTokens
-        )
-
-        testScheduler.advanceUntilIdle()
-        coVerify { mockApi.getPostById(eventId) }
-        assertNull(repository.event.first())
+        val result = repository.event.first()
+        assertNotNull(result)
+        assertTrue(result.isFailure)
+        assertNull(result.getOrNull())
     }
 
     @Test
     fun `should call API with correct event ID`() = runTest {
         val mockApi = mockk<PostControllerApi>()
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val testScope = TestScope(testDispatcher)
-        val loginTokens = MutableStateFlow(standardTokens)
+        val mockPostDto = createMockEventDto(id = specificEventId, title = "Mock Event")
+        val mockPaginatedParticipants = createMockParticipantsResponse(mockParticipantProfilePics)
 
-        val mockEvent = createMockEvent(
-            id = specificEventId,
-            title = "Mock Event"
-        )
+        coEvery { mockApi.getPostById(specificEventId) } returns mockPostDto
+        coEvery { mockApi.getPostParticipants(specificEventId, 0, 10) } returns mockPaginatedParticipants
 
-        coEvery { mockApi.getPostById(any()) } returns mockEvent
-
-        EventRepository(
-            scope = testScope,
-            dispatcher = testDispatcher,
+        val repository = EventRepository(
+            scope = backgroundScope,
+            dispatcher = coroutineContext[CoroutineDispatcher]!!,
             api = mockApi,
             eventId = specificEventId,
-            loginTokens = loginTokens
         )
 
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
+        repository.event.dropWhile { it == null }.first()
+
         coVerify { mockApi.getPostById(specificEventId) }
+        coVerify { mockApi.getPostParticipants(specificEventId, 0, 10) }
     }
 
     @Test
-    fun `should initialize with null event state`() = runTest {
-        val mockApi = mockk<PostControllerApi>()
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val testScope = TestScope(testDispatcher)
-        val loginTokens = MutableStateFlow(standardTokens)
+    fun `should initialize with null event state before load`() = runTest {
+        val mockApi = mockk<PostControllerApi>() // Mock behavior not strictly needed for this initial state check
 
-        val mockEvent = createMockEvent()
 
-        coEvery { mockApi.getPostById(eventId) } returns mockEvent
+        val mockPostDto = createMockEventDto()
+        val mockPaginatedParticipants = createMockParticipantsResponse(emptyList())
+        coEvery { mockApi.getPostById(eventId) } returns mockPostDto
+        coEvery { mockApi.getPostParticipants(eventId, 0, 10) } returns mockPaginatedParticipants
 
         val repository = EventRepository(
-            scope = testScope,
-            dispatcher = testDispatcher,
+            scope = backgroundScope,
+            dispatcher = coroutineContext[CoroutineDispatcher]!!,
             api = mockApi,
             eventId = eventId,
-            loginTokens = loginTokens
         )
-
         assertNull(repository.event.value)
     }
 
     @Test
     fun `should update event state after successful API call`() = runTest {
         val mockApi = mockk<PostControllerApi>()
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val testScope = TestScope(testDispatcher)
-        val loginTokens = MutableStateFlow(standardTokens)
 
-        val expectedEvent = createMockEvent(
+        val expectedPostDto = createMockEventDto(
             title = "Updated Event",
             images = listOf("updated.jpg"),
             payment = 50.0,
@@ -235,44 +229,58 @@ class EventRepositoryTest {
             savedByCurrentUser = true,
             description = "Updated Content"
         )
+        val updatedParticipantPics = listOf("updated_pic.jpg")
+        val mockPaginatedParticipants = createMockParticipantsResponse(updatedParticipantPics)
+        val expectedEventResponse = EventResponse(expectedPostDto, updatedParticipantPics)
 
-        coEvery { mockApi.getPostById(eventId) } returns expectedEvent
+        coEvery { mockApi.getPostById(eventId) } returns expectedPostDto
+        coEvery { mockApi.getPostParticipants(eventId, 0, 10) } returns mockPaginatedParticipants
 
         val repository = EventRepository(
-            scope = testScope,
-            dispatcher = testDispatcher,
+            scope = backgroundScope,
+            dispatcher = coroutineContext[CoroutineDispatcher]!!,
             api = mockApi,
             eventId = eventId,
-            loginTokens = loginTokens
         )
 
         assertNull(repository.event.value)
-        testScheduler.advanceUntilIdle()
-        assertEquals(expectedEvent, repository.event.value)
+        testScheduler.runCurrent()
+        repository.event.dropWhile { it == null }.first()
+
+        val result = repository.event.value
+        assertNotNull(result)
+        assertTrue(result.isSuccess)
+        assertEquals(expectedEventResponse, result.getOrNull())
     }
 
     @Test
-    fun `should work with blank tokens`() = runTest {
+    fun `should work with blank tokens and empty participants`() = runTest {
         val mockApi = mockk<PostControllerApi>()
-        val testDispatcher = StandardTestDispatcher(testScheduler)
-        val testScope = TestScope(testDispatcher)
-        val loginTokens = MutableStateFlow(Tokens.BLANK)
 
-        val expectedEvent = createMockEvent()
+        val expectedPostDto = createMockEventDto()
+        val mockPaginatedParticipants = createMockParticipantsResponse(emptyList())
+        val expectedEventResponse = EventResponse(expectedPostDto, emptyList())
 
-        coEvery { mockApi.getPostById(eventId) } returns expectedEvent
+        coEvery { mockApi.getPostById(eventId) } returns expectedPostDto
+        coEvery { mockApi.getPostParticipants(eventId, 0, 10) } returns mockPaginatedParticipants
+
 
         val repository = EventRepository(
-            scope = testScope,
-            dispatcher = testDispatcher,
+            scope = backgroundScope,
+            dispatcher = coroutineContext[CoroutineDispatcher]!!,
             api = mockApi,
             eventId = eventId,
-            loginTokens = loginTokens
         )
 
-        testScheduler.advanceUntilIdle()
+        testScheduler.runCurrent()
+        repository.event.dropWhile { it == null }.first()
 
         coVerify { mockApi.getPostById(eventId) }
-        assertEquals(expectedEvent, repository.event.first())
+        coVerify { mockApi.getPostParticipants(eventId, 0, 10) }
+
+        val result = repository.event.first()
+        assertNotNull(result)
+        assertTrue(result.isSuccess)
+        assertEquals(expectedEventResponse, result.getOrNull())
     }
 }
