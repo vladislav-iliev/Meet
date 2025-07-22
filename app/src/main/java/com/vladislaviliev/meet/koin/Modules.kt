@@ -9,6 +9,7 @@ import com.vladislaviliev.meet.network.repositories.user.UserRepository
 import com.vladislaviliev.meet.session.Session
 import com.vladislaviliev.meet.session.SessionRepository
 import com.vladislaviliev.meet.ui.loading.session.SessionViewModel
+import com.vladislaviliev.meet.ui.loading.user.LoadingUserViewModel
 import com.vladislaviliev.meet.ui.login.LoginViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.binds
 import org.koin.dsl.module
 import org.openapitools.client.apis.CognitoControllerApi
+import org.openapitools.client.apis.UserControllerApi
 
 val appModule = module {
     single { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
@@ -37,6 +39,10 @@ val appModule = module {
 
     viewModel {
         LoginViewModel(get<SessionRepository>().currentScope!!.get<LoginRepository>())
+    }
+
+    viewModel {
+        LoadingUserViewModel(get<SessionRepository>().currentScope!!.get<UserRepository>())
     }
 
     scope(named<Session>()) {
