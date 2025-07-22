@@ -9,7 +9,7 @@ internal class SessionRepository(private val koin: Koin) {
 
     val isSessionActive get() = currentScope != null
 
-    fun startSession() {
+    fun restartSession() {
         endSession()
         currentScope = koin.createScope<Session>()
     }

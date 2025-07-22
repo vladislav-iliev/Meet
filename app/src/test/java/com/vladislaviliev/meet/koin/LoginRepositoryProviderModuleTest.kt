@@ -56,7 +56,7 @@ class LoginRepositoryProviderModuleTest : KoinTest {
 
     @Test
     fun `LoginRepository can be created from Session scope`() {
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val currentScope = sessionRepository.currentScope
         assertNotNull(currentScope)
         assertNotNull(currentScope.get<LoginRepository>())
@@ -65,12 +65,12 @@ class LoginRepositoryProviderModuleTest : KoinTest {
     @Test
     fun `Multiple LoginRepository instances are scoped correctly`() {
         // Given: First session
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val firstRepository = sessionRepository.currentScope?.get<LoginRepository>()
 
         // When: Ending session and starting new one
         sessionRepository.endSession()
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val secondRepository = sessionRepository.currentScope?.get<LoginRepository>()
 
         // Then: Should create different instances for different scopes
@@ -82,7 +82,7 @@ class LoginRepositoryProviderModuleTest : KoinTest {
     @Test
     fun `LoginRepositoryProvider can be updated manually`() = runTest {
         // Given: Session is started and LoginRepository is created
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val loginRepository = sessionRepository.currentScope?.get<LoginRepository>()
         assertNotNull(loginRepository)
 
@@ -96,7 +96,7 @@ class LoginRepositoryProviderModuleTest : KoinTest {
     @Test
     fun `LoginRepositoryProvider is automatically updated when LoginRepository is created`() = runTest {
         // Given: Session is started
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val currentScope = sessionRepository.currentScope
         assertNotNull(currentScope)
 
@@ -115,7 +115,7 @@ class LoginRepositoryProviderModuleTest : KoinTest {
     @Test
     fun `LoginRepositoryProvider is automatically updated for each new session`() = runTest {
         // Given: First session
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val firstRepository = sessionRepository.currentScope?.get<LoginRepository>()
 
         // Then: Provider should be updated with first repository
@@ -123,7 +123,7 @@ class LoginRepositoryProviderModuleTest : KoinTest {
 
         // When: Ending session and starting new one
         sessionRepository.endSession()
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val secondRepository = sessionRepository.currentScope?.get<LoginRepository>()
 
         // Then: Provider should be automatically updated with new repository
@@ -134,7 +134,7 @@ class LoginRepositoryProviderModuleTest : KoinTest {
     @Test
     fun `LoginRepositoryProvider automatic update works with lazy initialization`() = runTest {
         // Given: Session is started but LoginRepository not yet requested
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val currentScope = sessionRepository.currentScope
         assertNotNull(currentScope)
 

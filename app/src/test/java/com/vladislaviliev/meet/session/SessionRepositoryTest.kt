@@ -19,18 +19,18 @@ class SessionRepositoryTest {
     }
 
     @Test
-    fun `startSession creates new scope and sets session as active`() {
-        sessionRepository.startSession()
+    fun `restartSession creates new scope and sets session as active`() {
+        sessionRepository.restartSession()
         assertNotNull(sessionRepository.currentScope)
         assertTrue(sessionRepository.isSessionActive)
     }
 
     @Test
-    fun `startSession closes existing scope before creating new one`() {
-        sessionRepository.startSession()
+    fun `restartSession closes existing scope before creating new one`() {
+        sessionRepository.restartSession()
         val firstScope = sessionRepository.currentScope
 
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val secondScope = sessionRepository.currentScope
 
         assertNotEquals(firstScope, secondScope)
@@ -39,7 +39,7 @@ class SessionRepositoryTest {
 
     @Test
     fun `endSession closes scope and sets session as inactive`() {
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         sessionRepository.endSession()
 
         assertNull(sessionRepository.currentScope)
@@ -56,7 +56,7 @@ class SessionRepositoryTest {
 
     @Test
     fun `multiple endSession calls are safe`() {
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         sessionRepository.endSession()
         sessionRepository.endSession()
         assertNull(sessionRepository.currentScope)

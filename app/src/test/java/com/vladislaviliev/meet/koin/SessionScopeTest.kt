@@ -33,7 +33,7 @@ class SessionScopeTest : KoinTest {
     @Test
     fun `LoginRepositoryTimer can be instantiated via Session scope`() {
         // Given: A session is started
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
 
         // When: We try to get LoginRepositoryTimer from the session scope
         val currentScope = sessionRepository.currentScope
@@ -46,12 +46,12 @@ class SessionScopeTest : KoinTest {
     @Test
     fun `LoginRepositoryTimer is scoped to Session lifecycle`() {
         // Given: A session is started
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val firstTimer = sessionRepository.currentScope?.get<LoginRepositoryTimer>()
 
         // When: Session is ended and restarted
         sessionRepository.endSession()
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
         val secondTimer = sessionRepository.currentScope?.get<LoginRepositoryTimer>()
 
         // Then: A new instance should be created for the new scope
@@ -66,7 +66,7 @@ class SessionScopeTest : KoinTest {
         assertTrue(!sessionRepository.isSessionActive)
 
         // When: Session is started
-        sessionRepository.startSession()
+        sessionRepository.restartSession()
 
         // Then: Session should be active and scope should be available
         assertTrue(sessionRepository.isSessionActive)
