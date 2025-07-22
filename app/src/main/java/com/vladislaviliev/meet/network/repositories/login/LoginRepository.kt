@@ -3,14 +3,12 @@ package com.vladislaviliev.meet.network.repositories.login
 import com.vladislaviliev.meet.network.TokenParser
 import com.vladislaviliev.meet.network.Tokens
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import org.openapitools.client.apis.CognitoControllerApi
 
 internal class LoginRepository(
-    private val scope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher,
     private val api: CognitoControllerApi,
     private val parser: TokenParser

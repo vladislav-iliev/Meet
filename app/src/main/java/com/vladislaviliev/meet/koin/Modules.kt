@@ -33,7 +33,7 @@ val appModule = module {
 
     scope<Session> {
         scoped {
-            LoginRepository(get(), Dispatchers.IO, CognitoControllerApi(client = get()), get())
+            LoginRepository(Dispatchers.IO, CognitoControllerApi(client = get()), get())
                 .also { get<LoginRepositoryProvider>().update(it) }
         }
         scoped {

@@ -38,7 +38,7 @@ class LoginRepositoryTest {
     }
 
     private fun TestScope.createRepository() =
-        LoginRepository(this, coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
+        LoginRepository(coroutineContext[CoroutineDispatcher]!!, mockApi, mockTokenParser)
 
     private suspend fun TestScope.performInitialLogin(repository: LoginRepository) {
         val mockLoginResponse = LoginResponseDTO(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN, TEST_USER_ID)
