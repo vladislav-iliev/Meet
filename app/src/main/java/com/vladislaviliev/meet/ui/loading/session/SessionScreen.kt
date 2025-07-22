@@ -10,8 +10,8 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 internal fun SessionScreen(onSessionRestarted: () -> Unit) {
     val viewModel = koinViewModel<SessionViewModel>()
-    val isSessionActive by viewModel.isSessionActive.collectAsStateWithLifecycle()
-    if (isSessionActive) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    if (state is LoadingState.Success) {
         onSessionRestarted()
         return
     }
