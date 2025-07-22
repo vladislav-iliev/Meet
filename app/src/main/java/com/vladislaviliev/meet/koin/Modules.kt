@@ -5,6 +5,7 @@ import com.vladislaviliev.meet.network.client.Client
 import com.vladislaviliev.meet.network.repositories.login.LoginRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
+import com.vladislaviliev.meet.network.repositories.user.UserRepository
 import com.vladislaviliev.meet.session.Session
 import com.vladislaviliev.meet.session.SessionRepository
 import com.vladislaviliev.meet.ui.loading.session.SessionViewModel
@@ -45,6 +46,13 @@ val appModule = module {
         }
         scoped {
             LoginRepositoryTimer(get(), get(), { System.currentTimeMillis() }, 60_000L)
+        }
+        scoped {
+            UserRepository(
+                Dispatchers.IO,
+                UserControllerApi(client = get()),
+                get<LoginRepository>().tokens.value.userId,
+            )
         }
     }
 }
