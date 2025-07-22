@@ -35,8 +35,7 @@ val appModule = module {
     viewModelOf(::SessionViewModel)
 
     viewModel {
-        val loginRepo = get<SessionRepository>().currentScope!!.get<LoginRepository>()
-        LoginViewModel(loginRepo)
+        LoginViewModel(get<SessionRepository>().currentScope!!.get<LoginRepository>())
     }
 
     scope(named<Session>()) {
