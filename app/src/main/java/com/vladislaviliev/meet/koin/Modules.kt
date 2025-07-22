@@ -7,7 +7,7 @@ import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvide
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.session.Session
 import com.vladislaviliev.meet.session.SessionRepository
-import com.vladislaviliev.meet.ui.loading.SessionViewModel
+import com.vladislaviliev.meet.ui.loading.session.SessionViewModel
 import com.vladislaviliev.meet.ui.login.LoginViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

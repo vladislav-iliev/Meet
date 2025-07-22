@@ -1,4 +1,4 @@
-package com.vladislaviliev.meet.ui.loading
+package com.vladislaviliev.meet.ui.loading.session
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

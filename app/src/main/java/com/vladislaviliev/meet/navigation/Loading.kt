@@ -3,7 +3,7 @@ package com.vladislaviliev.meet.navigation
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.vladislaviliev.meet.ui.loading.SessionScreen
+import com.vladislaviliev.meet.ui.loading.session.SessionScreen
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -1,4 +1,4 @@
-package com.vladislaviliev.meet.ui.loading
+package com.vladislaviliev.meet.ui.loading.session
 
 import com.vladislaviliev.meet.session.SessionRepository
 import com.vladislaviliev.meet.ui.MainDispatcherRule

@@ -1,8 +1,10 @@
-package com.vladislaviliev.meet.ui.loading
+package com.vladislaviliev.meet.ui.loading.session
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vladislaviliev.meet.ui.loading.LoadingScreen
+import com.vladislaviliev.meet.ui.loading.LoadingState
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
