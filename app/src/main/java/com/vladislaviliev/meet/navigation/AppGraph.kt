@@ -14,4 +14,5 @@ internal fun createAppGraph(controller: NavController) = controller
 private fun NavGraphBuilder.addAppGraphDestinations(controller: NavController) {
     addSessionDestination(controller::onSessionRestarted)
     addLoginDestination(controller::onLoggedIn)
+    addLoadingUserDestination(controller::onUserLoaded)
 }
