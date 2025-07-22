@@ -44,11 +44,7 @@ import com.vladislaviliev.meet.R
 import com.vladislaviliev.meet.ui.theme.MeetTheme
 
 @Composable
-internal fun LoginScreen(
-    onLoginClicked: (String, String) -> Unit,
-    onForgotPasswordClicked: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+internal fun LoginScreen(onLoginClicked: (String, String) -> Unit, modifier: Modifier = Modifier) {
     Surface(modifier) {
         Box(
             Modifier
@@ -58,10 +54,7 @@ internal fun LoginScreen(
                 .navigationBarsPadding()
                 .padding(15.dp)
         ) {
-            Contents(
-                onLoginClicked,
-                onForgotPasswordClicked
-            )
+            Contents(onLoginClicked)
         }
     }
 }
@@ -69,7 +62,6 @@ internal fun LoginScreen(
 @Composable
 private fun BoxScope.Contents(
     onLoginClicked: (String, String) -> Unit,
-    onForgotPasswordClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var email by remember { mutableStateOf("") }
@@ -112,7 +104,7 @@ private fun BoxScope.Contents(
             trailingIcon = { PasswordTrailingIcon(passwordVisible) { passwordVisible = !passwordVisible } }
         )
 
-        TextButton(onForgotPasswordClicked, Modifier.align(Alignment.CenterHorizontally)) {
+        TextButton({}, Modifier.align(Alignment.CenterHorizontally)) {
             Text(stringResource(R.string.forgot_password))
         }
     }
@@ -135,9 +127,6 @@ private fun PasswordTrailingIcon(isVisible: Boolean, onClick: () -> Unit) {
 @Composable
 fun LoginScreenPreview() {
     MeetTheme {
-        LoginScreen(
-            onLoginClicked = { _, _ -> },
-            onForgotPasswordClicked = {}
-        )
+        LoginScreen({ _, _ -> })
     }
 }
