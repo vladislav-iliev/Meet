@@ -13,15 +13,29 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.vladislaviliev.meet.ui.theme.MeetTheme
 import kotlinx.coroutines.flow.asFlow
+import org.koin.androidx.compose.koinViewModel
 import org.openapitools.client.models.PostResponseDto
 
 @Composable
-internal fun FeedScreen(events: LazyPagingItems<PostResponseDto>, modifier: Modifier = Modifier) {
+internal fun FeedScreen(onEventClick: (String) -> Unit) {
+    val viewModel = koinViewModel<FeedViewModel>()
+    val events = viewModel.feed.collectAsLazyPagingItems()
+    FeedScreen(onEventClick, events)
+}
+
+@Composable
+private fun FeedScreen(
+    onEventClick: (String) -> Unit,
+    events: LazyPagingItems<PostResponseDto>,
+    modifier: Modifier = Modifier
+) {
     Surface {
         Column(modifier.fillMaxSize()) {
             FeedTopBar(Modifier.fillMaxWidth())
             FeedList(
-                events, Modifier
+                onEventClick,
+                events,
+                Modifier
                     .fillMaxWidth()
                     .weight(1f)
             )
@@ -37,6 +51,6 @@ internal fun FeedScreen(events: LazyPagingItems<PostResponseDto>, modifier: Modi
 private fun Preview() {
     MeetTheme {
         val data = PagingData.from(emptyList<PostResponseDto>())
-        FeedScreen(listOf(data).asFlow().collectAsLazyPagingItems())
+        FeedScreen({}, listOf(data).asFlow().collectAsLazyPagingItems())
     }
 }
