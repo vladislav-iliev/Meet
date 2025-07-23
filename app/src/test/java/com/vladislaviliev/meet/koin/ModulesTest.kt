@@ -2,6 +2,7 @@ package com.vladislaviliev.meet.koin
 
 import androidx.paging.PagingConfig
 import com.vladislaviliev.meet.event.EventScopeRepository
+import com.vladislaviliev.meet.network.repositories.event.EventRepository
 import com.vladislaviliev.meet.network.repositories.feed.FeedRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
@@ -34,6 +35,7 @@ class ModulesTest {
                 definition<LoginRepositoryTimer>(Function0::class, Long::class),
                 definition<UserRepository>(CoroutineDispatcher::class, UserControllerApi::class, String::class),
                 definition<FeedRepository>(CoroutineDispatcher::class, PostControllerApi::class, User::class),
+                definition<EventRepository>(CoroutineDispatcher::class, PostControllerApi::class, String::class),
             )
         )
     }
