@@ -8,7 +8,8 @@ class EventScopeRepository(private val koin: Koin) {
     var currentScope: Scope? = null
         private set
 
-    private var currentEventId: String? = null
+    var currentEventId: String? = null
+        private set
 
     fun restartIfNeeded(eventId: String) {
         if (eventId == currentEventId) return
