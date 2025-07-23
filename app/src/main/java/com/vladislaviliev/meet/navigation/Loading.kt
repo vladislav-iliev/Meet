@@ -28,14 +28,5 @@ internal fun NavController.onSessionRestarted() {
 
 internal fun NavController.onUserLoaded() {
     popBackStack()
-    println("USER LOADED")
-    println("USER LOADED")
-    println("USER LOADED")
-    println("USER LOADED")
-    println("USER LOADED")
-    println("USER LOADED")
-    println("USER LOADED")
-    println("USER LOADED")
-    println("USER LOADED")
-    println("USER LOADED")
+    navigate(FeedRoute)
 }
