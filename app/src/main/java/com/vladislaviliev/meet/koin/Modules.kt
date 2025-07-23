@@ -1,13 +1,16 @@
 package com.vladislaviliev.meet.koin
 
+import androidx.paging.PagingConfig
 import com.vladislaviliev.meet.network.TokenParser
 import com.vladislaviliev.meet.network.client.Client
+import com.vladislaviliev.meet.network.repositories.feed.FeedRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryProvider
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.network.repositories.user.UserRepository
 import com.vladislaviliev.meet.session.Session
 import com.vladislaviliev.meet.session.SessionRepository
+import com.vladislaviliev.meet.ui.feed.FeedViewModel
 import com.vladislaviliev.meet.ui.loading.session.SessionViewModel
 import com.vladislaviliev.meet.ui.loading.user.LoadingUserViewModel
 import com.vladislaviliev.meet.ui.login.LoginViewModel
@@ -23,6 +26,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.binds
 import org.koin.dsl.module
 import org.openapitools.client.apis.CognitoControllerApi
+import org.openapitools.client.apis.PostControllerApi
 import org.openapitools.client.apis.UserControllerApi
 
 val appModule = module {
@@ -45,6 +49,11 @@ val appModule = module {
         LoadingUserViewModel(get<SessionRepository>().currentScope!!.get<UserRepository>())
     }
 
+    viewModel {
+        val pagingConfig = PagingConfig(10, enablePlaceholders = false)
+        FeedViewModel(get<SessionRepository>().currentScope!!.get<FeedRepository>(), pagingConfig)
+    }
+
     scope(named<Session>()) {
         scoped {
             LoginRepository(Dispatchers.IO, CognitoControllerApi(client = get()), get())
@@ -59,6 +68,9 @@ val appModule = module {
                 UserControllerApi(client = get()),
                 get<LoginRepository>().tokens.value.userId,
             )
+        }
+        scoped {
+            FeedRepository(Dispatchers.IO, PostControllerApi(client = get()), get<UserRepository>().user.value)
         }
     }
 }
