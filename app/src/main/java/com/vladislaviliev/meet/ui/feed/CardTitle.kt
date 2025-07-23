@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,7 @@ private fun Avatar(uri: String, modifier: Modifier = Modifier) {
         modifier = modifier
             .size(48.dp)
             .clip(MaterialTheme.shapes.medium),
+        contentScale = ContentScale.FillWidth,
         placeholder = painterResource(R.drawable.ic_launcher_background),
         error = painterResource(R.drawable.ic_launcher_background)
     )
