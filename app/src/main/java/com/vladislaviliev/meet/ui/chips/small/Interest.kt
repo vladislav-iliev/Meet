@@ -20,8 +20,8 @@ private fun Interest.chipIcon(): @Composable () -> Unit = {
     AsyncImage(
         icon,
         name,
-        placeholder = painterResource(R.drawable.ic_launcher_background),
-        error = painterResource(R.drawable.ic_launcher_background),
+        placeholder = painterResource(R.drawable.image_downloading),
+        error = painterResource(R.drawable.image_broken),
         modifier = Modifier.size(dimensionResource(R.dimen.small_chip_icon)),
         contentScale = ContentScale.Fit
     )

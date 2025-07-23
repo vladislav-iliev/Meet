@@ -28,8 +28,8 @@ internal fun EventAuthor(imgUri: String, name: String, occupation: String, modif
             modifier = Modifier
                 .size(52.dp)
                 .clip(MaterialTheme.shapes.medium),
-            placeholder = painterResource(id = R.drawable.ic_launcher_background),
-            error = painterResource(id = R.drawable.ic_launcher_background),
+            placeholder = painterResource(R.drawable.image_downloading),
+            error = painterResource(R.drawable.image_broken),
             contentScale = ContentScale.FillWidth,
         )
         Spacer(Modifier.width(12.dp))

@@ -42,8 +42,8 @@ private fun Avatar(uri: String, modifier: Modifier = Modifier) {
             .size(48.dp)
             .clip(MaterialTheme.shapes.medium),
         contentScale = ContentScale.FillWidth,
-        placeholder = painterResource(R.drawable.ic_launcher_background),
-        error = painterResource(R.drawable.ic_launcher_background)
+        placeholder = painterResource(R.drawable.image_downloading),
+        error = painterResource(R.drawable.image_broken)
     )
 }
 

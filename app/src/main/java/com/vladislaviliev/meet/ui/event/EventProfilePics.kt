@@ -26,8 +26,8 @@ fun EventProfilePics(uris: Iterable<String>, modifier: Modifier = Modifier) {
 
             AsyncImage(
                 model = uri,
-                placeholder = painterResource(R.drawable.ic_launcher_background),
-                error = painterResource(R.drawable.ic_launcher_background),
+                placeholder = painterResource(R.drawable.image_downloading),
+                error = painterResource(R.drawable.image_broken),
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
