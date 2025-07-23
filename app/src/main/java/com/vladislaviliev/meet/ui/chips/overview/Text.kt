@@ -5,6 +5,7 @@ import androidx.compose.ui.res.stringResource
 import com.vladislaviliev.meet.R
 import org.openapitools.client.models.PostResponseDto
 import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 @Composable
 internal fun PostResponseDto.overviewChipText(type: OverviewChipType) = when (type) {
@@ -20,27 +21,33 @@ internal fun PostResponseDto.overviewChipText(type: OverviewChipType) = when (ty
 @Composable
 private fun payment(post: PostResponseDto): String {
     val payment = post.payment
-    return if (payment == 0.0) stringResource(R.string.free) else payment.toString()
+    val currency = post.currency?.code ?: ""
+    return if (payment == 0.0) stringResource(R.string.free) else "${payment.roundToInt()} $currency"
 }
 
 private fun date(post: PostResponseDto): String {
     val from = post.fromDate!!
-    val to = post.toDate!!
-    val formatter = DateTimeFormatter.ofPattern("MM")
-    return "${from.dayOfMonth}.${from.format(formatter)} - ${to.dayOfMonth}.${to.format(formatter)}"
+    val to = post.toDate
+    val formatter = DateTimeFormatter.ofPattern("dd.MM")
+    if (null == to)
+        return "${from.format(formatter)}"
+    return "${from.format(formatter)} - ${to.format(formatter)}"
 }
 
 private fun time(post: PostResponseDto): String {
-    val fromTime = post.fromDate!!
-    val toTime = post.toDate!!
-    return "${fromTime.hour}:${fromTime.minute} - ${toTime.hour}:${toTime.minute}"
+    val from = post.fromDate!!
+    val to = post.toDate
+    val formatter = DateTimeFormatter.ofPattern("HH:mm")
+    if (null == to)
+        return "${from.format(formatter)}"
+    return "${from.format(formatter)} - ${to.format(formatter)}"
 }
 
 @Composable
 private fun participants(post: PostResponseDto): String {
     val participants = post.participantsCount
     val max = post.maximumPeople
-    return stringResource(R.string.participants) + " " + if (max == null) participants.toString() else "$participants/$max"
+    return if (max == null) participants.toString() else "$participants/$max"
 }
 
 private fun location(post: PostResponseDto): String {
@@ -50,9 +57,9 @@ private fun location(post: PostResponseDto): String {
     val country = location.country
 
     val builder = StringBuilder()
-    builder.append(name)
-    if (city != null) builder.append(", $city")
-    if (country != null) builder.append(", $country")
+    if (name.isNotEmpty()) builder.append("$name, ")
+    if (city != null && city.isNotEmpty()) builder.append("$city, ")
+    if (country != null && country.isNotEmpty()) builder.append(country)
     return builder.toString()
 }
 
