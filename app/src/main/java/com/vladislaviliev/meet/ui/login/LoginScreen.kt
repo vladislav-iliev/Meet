@@ -95,6 +95,7 @@ private fun BoxScope.Contents(
             onValueChange = { email = it },
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.email)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             singleLine = true,
         )
 
