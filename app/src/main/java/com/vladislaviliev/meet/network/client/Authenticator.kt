@@ -7,7 +7,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
 
-internal class Authenticator(private val loginRepository: () -> LoginRepository?, ) : Authenticator {
+internal class Authenticator(private val loginRepository: () -> LoginRepository?) : Authenticator {
 
     private fun priorResponsesCount(response: Response) = generateSequence(response) { it.priorResponse }.count()
 

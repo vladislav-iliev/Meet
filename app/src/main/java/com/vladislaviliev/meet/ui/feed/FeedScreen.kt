@@ -44,7 +44,8 @@ private fun FeedScreen(
     }
 }
 
-@Preview(showSystemUi = true, showBackground = false,
+@Preview(
+    showSystemUi = true, showBackground = false,
     uiMode = Configuration.UI_MODE_TYPE_NORMAL
 )
 @Composable
