@@ -49,24 +49,24 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 
 @Composable
-internal fun EventScreen() {
+internal fun EventScreen(onUpPressed: () -> Unit) {
     val vm = getKoin()
         .get<EventScopeRepository>()
         .currentScope!!
         .get<EventViewModel>()
     val event by vm.repo.event.collectAsStateWithLifecycle()
-    EventScreen(event as Event.Success)
+    EventScreen(onUpPressed, event as Event.Success)
 }
 
 @Composable
-private fun EventScreen(event: Event.Success, modifier: Modifier = Modifier) {
+private fun EventScreen(onUpPressed: () -> Unit, event: Event.Success, modifier: Modifier = Modifier) {
     Surface(modifier) {
         Box {
             Column(Modifier.fillMaxSize()) {
                 ScrollableContent(event.postResponseDto, event.participants, Modifier.weight(1f))
                 EventBottomBar(Modifier.fillMaxWidth())
             }
-            EventTopBar(Modifier.align(Alignment.TopCenter))
+            EventTopBar(onUpPressed, Modifier.align(Alignment.TopCenter))
         }
     }
 }
@@ -154,7 +154,7 @@ private fun SectionHeader(@StringRes stringRes: Int) {
 
 @Preview(
     showSystemUi = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL, showBackground = false
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL, showBackground = false
 )
 @Composable
 fun EventScreenFullPreview() {
@@ -215,6 +215,6 @@ fun EventScreenFullPreview() {
         currentUserArrivalStatus = null
     )
     MeetTheme {
-        EventScreen(Event.Success(samplePost, listOf("", "", "", "", "")))
+        EventScreen({}, Event.Success(samplePost, listOf("", "", "", "", "")))
     }
 }

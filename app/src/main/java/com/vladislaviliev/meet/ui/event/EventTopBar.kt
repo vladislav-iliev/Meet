@@ -18,11 +18,11 @@ import com.vladislaviliev.meet.ui.theme.MeetTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun EventTopBar(modifier: Modifier = Modifier) {
+internal fun EventTopBar(onUpPressed: () -> Unit, modifier: Modifier = Modifier) {
     TopAppBar(
         {},
         modifier,
-        { FilledIconButton({}) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back)) } },
+        { FilledIconButton(onUpPressed) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back)) } },
         { FilledIconButton({}) { Icon(Icons.Default.MoreVert, stringResource(R.string.more)) } },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
     )
@@ -32,6 +32,6 @@ internal fun EventTopBar(modifier: Modifier = Modifier) {
 @Composable
 private fun PreviewTopBar() {
     MeetTheme {
-        EventTopBar()
+        EventTopBar({})
     }
 }
