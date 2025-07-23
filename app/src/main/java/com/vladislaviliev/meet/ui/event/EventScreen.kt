@@ -74,7 +74,7 @@ private fun EventScreen(event: Event.Success, modifier: Modifier = Modifier) {
 @Composable
 private fun ScrollableContent(post: PostResponseDto, participantPics: Iterable<String>, modifier: Modifier = Modifier) {
     Column(modifier.verticalScroll(rememberScrollState())) {
-        EventImage("", Modifier.fillMaxWidth())
+        EventImage(post.images.first(), Modifier.fillMaxWidth())
         Column(
             Modifier
                 .fillMaxWidth()
