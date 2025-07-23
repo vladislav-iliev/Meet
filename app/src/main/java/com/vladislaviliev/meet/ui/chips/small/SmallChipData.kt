@@ -20,11 +20,12 @@ internal fun PostResponseDto.smallChipsData(): List<SmallChipData> {
         smallChipData(OverviewChipType.Participants),
         smallChipData(OverviewChipType.Location),
         smallChipData(OverviewChipType.Accessibility),
-        smallChipData(OverviewChipType.ConfirmLocation)
     )
-    if (this.fromDate != null) {
+    if (fromDate != null) {
         list.add(1, smallChipData(OverviewChipType.Date))
         list.add(2, smallChipData(OverviewChipType.Time))
     }
+    if (this.needsLocationalConfirmation)
+        list.add(smallChipData(OverviewChipType.ConfirmLocation))
     return list
 }
