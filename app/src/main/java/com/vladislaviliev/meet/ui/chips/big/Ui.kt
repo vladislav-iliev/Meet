@@ -49,6 +49,6 @@ internal fun BigChip(data: BigChipData, modifier: Modifier = Modifier, outlined:
 }
 
 @Composable
-internal fun BigChipParticipants(data: BigChipData, uris: Iterable<String>, modifier: Modifier = Modifier) {
-    BigChip(data, { EventProfilePics(uris) }, modifier)
+internal fun BigChipParticipants(data: BigChipData, profilePics: Iterable<String>, modifier: Modifier = Modifier) {
+    BigChip(data, { EventProfilePics(profilePics) }, modifier)
 }
