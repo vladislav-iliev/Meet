@@ -5,6 +5,8 @@ https://github.com/vladislav-iliev/meet/blob/main/media/demo.mp4
 
 ## Inside
 
+All non-UI components tested. Tests in standard unit test directory. Currently over 110.
+
 ### Scopes
 
 Two fundamental elements - a user Session scope, and an Event scope. Each delimit the lifetime of storage components.
