@@ -43,13 +43,9 @@ val appModule = module {
 
     viewModelOf(::SessionViewModel)
 
-    viewModel {
-        LoginViewModel(get<SessionRepository>().currentScope!!.get<LoginRepository>())
-    }
+    viewModel { LoginViewModel(get<SessionRepository>().currentScope!!.get<LoginRepository>()) }
 
-    viewModel {
-        LoadingUserViewModel(get<SessionRepository>().currentScope!!.get<UserRepository>())
-    }
+    viewModel { LoadingUserViewModel(get<SessionRepository>().currentScope!!.get<UserRepository>()) }
 
     viewModel {
         val pagingConfig = PagingConfig(10, enablePlaceholders = false)
@@ -71,8 +67,6 @@ val appModule = module {
                 get<LoginRepository>().tokens.value.userId,
             )
         }
-        scoped {
-            FeedRepository(Dispatchers.IO, PostControllerApi(client = get()), get<UserRepository>().user.value)
-        }
+        scoped { FeedRepository(Dispatchers.IO, PostControllerApi(client = get()), get<UserRepository>().user.value) }
     }
 }
