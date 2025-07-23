@@ -76,9 +76,7 @@ val appModule = module {
     scope<EventScope> {
         scoped {
             EventRepository(
-                Dispatchers.IO,
-                PostControllerApi(client = get()),
-                get<EventScopeRepository>().currentEventId!!
+                Dispatchers.IO, PostControllerApi(client = get()), get<EventScopeRepository>().currentEventId!!
             )
         }
         scoped { LoadingEventViewModel(get<EventScopeRepository>().currentScope!!.get<EventRepository>()) }
