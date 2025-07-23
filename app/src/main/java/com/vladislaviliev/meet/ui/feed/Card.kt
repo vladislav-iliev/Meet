@@ -14,8 +14,8 @@ import com.vladislaviliev.meet.ui.chips.small.smallChipsData
 import org.openapitools.client.models.PostResponseDto
 
 @Composable
-internal fun CardItem(item: PostResponseDto, modifier: Modifier = Modifier) {
-    Card(modifier) {
+internal fun CardItem(onClick: (String) -> Unit, item: PostResponseDto, modifier: Modifier = Modifier) {
+    Card({ onClick(item.id) }, modifier) {
         Column {
 
             val cardPadding = dimensionResource(R.dimen.feed_card_padding)
