@@ -76,7 +76,8 @@ private fun ScrollableContent(post: PostResponseDto, participantPics: Iterable<S
 
             val chipSpacer = Modifier.height(8.dp)
 
-            BigChip(post.bigChipData(OverviewChipType.Date), Modifier.padding(top = 4.dp))
+            if (post.fromDate != null)
+                BigChip(post.bigChipData(OverviewChipType.Date), Modifier.padding(top = 4.dp))
 
             Spacer(chipSpacer)
             BigChip(post.bigChipData(OverviewChipType.Location))
