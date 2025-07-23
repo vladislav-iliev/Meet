@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.vladislaviliev.meet.R
+import com.vladislaviliev.meet.ui.chips.parser.ChipParser
 import com.vladislaviliev.meet.ui.chips.small.FlowRowSmallChips
-import com.vladislaviliev.meet.ui.chips.small.smallChipsData
 import org.openapitools.client.models.PostResponseDto
 
 @Composable
@@ -40,7 +40,10 @@ internal fun CardItem(onClick: (String) -> Unit, item: PostResponseDto, modifier
                     .padding(cardPadding - 10.dp, 0.dp)
             )
 
-            FlowRowSmallChips(item.smallChipsData(), Modifier.padding(cardPadding, 0.dp, cardPadding, cardPadding))
+            FlowRowSmallChips(
+                ChipParser().smallChipsData(item),
+                Modifier.padding(cardPadding, 0.dp, cardPadding, cardPadding)
+            )
         }
     }
 }

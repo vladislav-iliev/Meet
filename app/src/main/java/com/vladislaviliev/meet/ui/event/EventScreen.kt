@@ -30,14 +30,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladislaviliev.meet.R
 import com.vladislaviliev.meet.event.EventScopeRepository
 import com.vladislaviliev.meet.network.repositories.event.Event
+import com.vladislaviliev.meet.ui.chips.OverviewChipType
 import com.vladislaviliev.meet.ui.chips.big.BigChip
 import com.vladislaviliev.meet.ui.chips.big.BigChipParticipants
-import com.vladislaviliev.meet.ui.chips.big.bigChipData
-import com.vladislaviliev.meet.ui.chips.overview.OverviewChipType
+import com.vladislaviliev.meet.ui.chips.parser.ChipParser
 import com.vladislaviliev.meet.ui.chips.small.FlowRowSmallChips
 import com.vladislaviliev.meet.ui.chips.small.SmallChip
-import com.vladislaviliev.meet.ui.chips.small.interestChipsData
-import com.vladislaviliev.meet.ui.chips.small.smallChipData
 import com.vladislaviliev.meet.ui.theme.MeetTheme
 import org.koin.compose.getKoin
 import org.openapitools.client.models.BaseLocation
@@ -90,26 +88,27 @@ private fun ScrollableContent(post: PostResponseDto, participantPics: Iterable<S
             )
 
             val chipSpacer = Modifier.height(8.dp)
+            val chipParser = ChipParser()
 
             if (post.fromDate != null)
-                BigChip(post.bigChipData(OverviewChipType.Date), Modifier.padding(top = 4.dp))
+                BigChip(chipParser.bigChipData(OverviewChipType.Date, post), Modifier.padding(top = 4.dp))
 
             Spacer(chipSpacer)
-            BigChip(post.bigChipData(OverviewChipType.Location))
+            BigChip(chipParser.bigChipData(OverviewChipType.Location, post))
 
             Spacer(chipSpacer)
-            BigChipParticipants(post.bigChipData(OverviewChipType.Participants), participantPics)
+            BigChipParticipants(chipParser.bigChipData(OverviewChipType.Participants, post), participantPics)
 
             if (post.needsLocationalConfirmation) {
                 Spacer(chipSpacer)
-                BigChip(post.bigChipData(OverviewChipType.ConfirmLocation), outlined = true)
+                BigChip(chipParser.bigChipData(OverviewChipType.ConfirmLocation, post), outlined = true)
             }
 
             Spacer(chipSpacer)
-            BigChip(post.bigChipData(OverviewChipType.Accessibility))
+            BigChip(chipParser.bigChipData(OverviewChipType.Accessibility, post))
 
             Spacer(chipSpacer)
-            BigChip(post.bigChipData(OverviewChipType.Payment))
+            BigChip(chipParser.bigChipData(OverviewChipType.Payment, post))
 
             Description(post)
             Location(post)
@@ -128,7 +127,7 @@ private fun Description(post: PostResponseDto) {
 @Composable
 private fun Location(post: PostResponseDto) {
     SectionHeader(R.string.location)
-    SmallChip(post.smallChipData(OverviewChipType.Location).copy({ }))
+    SmallChip(ChipParser().smallChipData(OverviewChipType.Location, post))
     Spacer(Modifier.height(16.dp))
     Image(
         painterResource(R.drawable.ic_launcher_background),
@@ -144,7 +143,7 @@ private fun Location(post: PostResponseDto) {
 @Composable
 private fun EventInterests(post: PostResponseDto) {
     SectionHeader(R.string.interests)
-    FlowRowSmallChips(post.interestChipsData(), Modifier.fillMaxWidth())
+    FlowRowSmallChips(ChipParser().interestChipsData(post), Modifier.fillMaxWidth())
 }
 
 @Composable
