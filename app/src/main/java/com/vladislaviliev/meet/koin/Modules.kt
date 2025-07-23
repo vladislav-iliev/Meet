@@ -1,6 +1,7 @@
 package com.vladislaviliev.meet.koin
 
 import androidx.paging.PagingConfig
+import com.vladislaviliev.meet.event.EventScopeRepository
 import com.vladislaviliev.meet.network.TokenParser
 import com.vladislaviliev.meet.network.client.Client
 import com.vladislaviliev.meet.network.repositories.feed.FeedRepository
@@ -33,7 +34,9 @@ val appModule = module {
     single { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 
     singleOf(::LoginRepositoryProvider)
+
     single { SessionRepository(getKoin()) }
+    single { EventScopeRepository(getKoin()) }
 
     singleOf(::TokenParser)
 

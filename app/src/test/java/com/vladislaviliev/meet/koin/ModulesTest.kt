@@ -1,6 +1,7 @@
 package com.vladislaviliev.meet.koin
 
 import androidx.paging.PagingConfig
+import com.vladislaviliev.meet.event.EventScopeRepository
 import com.vladislaviliev.meet.network.repositories.feed.FeedRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepository
 import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
@@ -27,6 +28,7 @@ class ModulesTest {
         appModule.verify(
             injections = injectedParameters(
                 definition<SessionRepository>(Koin::class),
+                definition<EventScopeRepository>(Koin::class),
                 definition<FeedViewModel>(PagingConfig::class),
                 definition<LoginRepository>(CoroutineDispatcher::class, CognitoControllerApi::class),
                 definition<LoginRepositoryTimer>(Function0::class, Long::class),
