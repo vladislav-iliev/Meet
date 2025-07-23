@@ -129,7 +129,7 @@ private fun BoxScope.Contents(
 
 @Composable
 private fun PasswordTrailingIcon(isVisible: Boolean, onClick: () -> Unit) {
-    val image = if (isVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+    val image = if (isVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
     val description = if (isVisible) stringResource(R.string.hide_password) else stringResource(R.string.show_password)
     IconButton(onClick) { Icon(image, description) }
 }
