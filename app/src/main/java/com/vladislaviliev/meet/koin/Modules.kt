@@ -23,7 +23,6 @@ import okhttp3.OkHttpClient
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
-import org.koin.core.qualifier.named
 import org.koin.dsl.binds
 import org.koin.dsl.module
 import org.openapitools.client.apis.CognitoControllerApi
@@ -57,7 +56,7 @@ val appModule = module {
         FeedViewModel(get<SessionRepository>().currentScope!!.get<FeedRepository>(), pagingConfig)
     }
 
-    scope(named<Session>()) {
+    scope<Session> {
         scoped {
             LoginRepository(Dispatchers.IO, CognitoControllerApi(client = get()), get())
                 .also { get<LoginRepositoryProvider>().update(it) }
