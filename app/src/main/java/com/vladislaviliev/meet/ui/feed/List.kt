@@ -15,7 +15,9 @@ import com.vladislaviliev.meet.R
 import org.openapitools.client.models.PostResponseDto
 
 @Composable
-internal fun ColumnScope.FeedList(items: LazyPagingItems<PostResponseDto>, modifier: Modifier = Modifier) {
+internal fun ColumnScope.FeedList(
+    onEventClick: (String) -> Unit, items: LazyPagingItems<PostResponseDto>, modifier: Modifier = Modifier
+) {
     LazyColumn(
         modifier
             .weight(1f)
@@ -23,6 +25,6 @@ internal fun ColumnScope.FeedList(items: LazyPagingItems<PostResponseDto>, modif
         contentPadding = PaddingValues(dimensionResource(R.dimen.feed_list_padding)),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(items.itemCount, items.itemKey { it::id }) { CardItem(items[it]!!) }
+        items(items.itemCount, items.itemKey { it.id }) { CardItem(onEventClick, items[it]!!) }
     }
 }
