@@ -1,5 +1,6 @@
 package com.vladislaviliev.meet.ui.chips.overview
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.DateRange
@@ -10,6 +11,8 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.vladislaviliev.meet.R
 
@@ -26,7 +29,7 @@ internal fun OverviewChipType.icon(): @Composable () -> Unit {
         OverviewChipType.ConfirmLocation -> Icons.AutoMirrored.Filled.Send
     }
 
-    return { Icon(icon, iconDescription()) }
+    return { Icon(icon, iconDescription(), Modifier.size(dimensionResource(R.dimen.small_chip_icon))) }
 }
 
 @Composable
