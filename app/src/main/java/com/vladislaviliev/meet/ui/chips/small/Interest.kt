@@ -3,8 +3,8 @@ package com.vladislaviliev.meet.ui.chips.small
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.vladislaviliev.meet.R
 import org.openapitools.client.models.Interest
@@ -21,6 +21,6 @@ private fun Interest.chipIcon(): @Composable () -> Unit = {
         name,
         placeholder = painterResource(R.drawable.ic_launcher_background),
         error = painterResource(R.drawable.ic_launcher_background),
-        modifier = Modifier.size(18.dp)
+        modifier = Modifier.size(dimensionResource(R.dimen.small_chip_icon))
     )
 }
