@@ -28,6 +28,6 @@ private fun location(post: PostResponseDto) = "${post.location.name}, ${post.loc
 
 @Composable
 private fun accessibility(post: PostResponseDto) = stringResource(
-    if (post.accessibility == PostResponseDto.Accessibility.PRIVATE) R.string._private
-    else R.string.only_invited_people_can_join
+    if (post.accessibility == PostResponseDto.Accessibility.PRIVATE) R.string.only_invited_people_can_join
+    else R.string.everyone_can_join_the_event
 )
