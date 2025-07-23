@@ -1,5 +1,6 @@
 package com.vladislaviliev.meet.ui.chips.small
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
@@ -24,7 +25,8 @@ internal fun FlowRowSmallChips(data: List<SmallChipData>, modifier: Modifier = M
 internal fun SmallChip(data: SmallChipData, modifier: Modifier = Modifier) {
     Row(
         modifier
-            .border(width = 1.dp, MaterialTheme.colorScheme.outline, SuggestionChipDefaults.shape)
+            .background(SuggestionChipDefaults.suggestionChipColors().containerColor, SuggestionChipDefaults.shape)
+            .border(1.dp, MaterialTheme.colorScheme.outline, SuggestionChipDefaults.shape)
             .padding(8.dp),
         Arrangement.spacedBy(6.dp),
         Alignment.CenterVertically,
