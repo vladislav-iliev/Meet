@@ -100,8 +100,10 @@ private fun ScrollableContent(post: PostResponseDto, participantPics: Iterable<S
             Spacer(chipSpacer)
             BigChipParticipants(post.bigChipData(OverviewChipType.Participants), participantPics)
 
-            Spacer(chipSpacer)
-            BigChip(post.bigChipData(OverviewChipType.ConfirmLocation), outlined = true)
+            if (post.needsLocationalConfirmation) {
+                Spacer(chipSpacer)
+                BigChip(post.bigChipData(OverviewChipType.ConfirmLocation), outlined = true)
+            }
 
             Spacer(chipSpacer)
             BigChip(post.bigChipData(OverviewChipType.Accessibility))
