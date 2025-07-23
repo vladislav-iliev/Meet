@@ -22,7 +22,7 @@ private fun payment(post: PostResponseDto) =
     if (post.payment == 0.0) stringResource(R.string.no_payment_required) else stringResource(R.string.payment_required)
 
 @Composable
-private fun date(post: PostResponseDto) = post.overviewChipText(OverviewChipType.Time)
+private fun date(post: PostResponseDto) = post.overviewSmallChipText(OverviewChipType.Time)
 
 private fun location(post: PostResponseDto) = "${post.location.name}, ${post.location.city}"
 
