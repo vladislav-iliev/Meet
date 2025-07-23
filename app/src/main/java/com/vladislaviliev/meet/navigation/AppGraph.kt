@@ -16,4 +16,5 @@ private fun NavGraphBuilder.addAppGraphDestinations(controller: NavController) {
     addLoginDestination(controller::onLoggedIn)
     addLoadingUserDestination(controller::onUserLoaded)
     addFeedDestination(controller::onEventClick)
+    addLoadingEventDestination(controller::onEventLoaded)
 }

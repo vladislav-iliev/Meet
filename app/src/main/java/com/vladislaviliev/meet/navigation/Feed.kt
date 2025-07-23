@@ -14,10 +14,5 @@ internal fun NavGraphBuilder.addFeedDestination(onEventClick: (String) -> Unit) 
 }
 
 internal fun NavController.onEventClick(id: String) {
-    println("CLICKED EVENT!!!!")
-    println("CLICKED EVENT!!!!")
-    println("CLICKED EVENT!!!!")
-    println("CLICKED EVENT!!!!")
-    println("CLICKED EVENT!!!!")
-    println("CLICKED EVENT!!!!")
+    navigate(LoadEventRoute(id))
 }
