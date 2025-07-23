@@ -14,8 +14,10 @@ internal class LoginViewModel(private val loginRepository: LoginRepository) : Vi
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
+
             _state.value = LoginState.Loading
             val result = loginRepository.loginDispatched(email, password)
+
             _state.value = when {
                 result.isSuccess -> LoginState.Success
                 else -> LoginState.Error(result.exceptionOrNull()!!.toString())

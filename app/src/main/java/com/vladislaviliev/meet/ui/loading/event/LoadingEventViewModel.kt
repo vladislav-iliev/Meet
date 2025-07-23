@@ -19,6 +19,7 @@ internal class LoadingEventViewModel(private val repository: EventRepository) : 
     fun download() {
         viewModelScope.launch {
             val result = repository.download()
+
             _state.value = when {
                 result.isSuccess -> LoadingState.Success
                 else -> LoadingState.Error(result.exceptionOrNull()!!.toString())

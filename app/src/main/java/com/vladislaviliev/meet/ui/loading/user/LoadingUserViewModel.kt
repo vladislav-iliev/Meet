@@ -19,6 +19,7 @@ internal class LoadingUserViewModel(private val userRepository: UserRepository) 
     fun download() {
         viewModelScope.launch {
             val result = userRepository.download()
+
             _state.value = when {
                 result.isSuccess -> LoadingState.Success
                 else -> LoadingState.Error(result.exceptionOrNull()!!.toString())
