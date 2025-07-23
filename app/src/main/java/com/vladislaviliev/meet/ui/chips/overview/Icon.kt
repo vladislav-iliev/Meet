@@ -1,5 +1,6 @@
 package com.vladislaviliev.meet.ui.chips.overview
 
+import androidx.annotation.DimenRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -17,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import com.vladislaviliev.meet.R
 
 @Composable
-internal fun OverviewChipType.icon(): @Composable () -> Unit {
+internal fun OverviewChipType.icon(@DimenRes iconSize: Int): @Composable () -> Unit {
 
     val icon = when (this) {
         OverviewChipType.Payment -> Icons.Filled.Receipt
@@ -29,7 +30,7 @@ internal fun OverviewChipType.icon(): @Composable () -> Unit {
         OverviewChipType.ConfirmLocation -> Icons.AutoMirrored.Filled.Send
     }
 
-    return { Icon(icon, iconDescription(), Modifier.size(dimensionResource(R.dimen.small_chip_icon))) }
+    return { Icon(icon, iconDescription(), Modifier.size(dimensionResource(iconSize))) }
 }
 
 @Composable

@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 @Composable
-internal fun PostResponseDto.overviewChipText(type: OverviewChipType) = when (type) {
+internal fun PostResponseDto.overviewSmallChipText(type: OverviewChipType) = when (type) {
     OverviewChipType.Payment -> payment(this)
     OverviewChipType.Date -> date(this)
     OverviewChipType.Time -> time(this)
@@ -16,6 +16,12 @@ internal fun PostResponseDto.overviewChipText(type: OverviewChipType) = when (ty
     OverviewChipType.Participants -> participants(this)
     OverviewChipType.Accessibility -> accessibility(this)
     OverviewChipType.ConfirmLocation -> stringResource(R.string.confirm_location)
+}
+
+@Composable
+internal fun PostResponseDto.overviewBigChipText(type: OverviewChipType) = when (type) {
+    OverviewChipType.Participants -> "Participants " + overviewSmallChipText(OverviewChipType.Participants)
+    else -> overviewSmallChipText(type)
 }
 
 @Composable
