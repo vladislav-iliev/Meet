@@ -40,8 +40,7 @@ class LoadingUserViewModelTest {
     fun `state becomes Success when download is successful`() = runTest {
         coEvery { userRepository.download() } returns Result.success(Unit)
         val viewModel = LoadingUserViewModel(userRepository)
-        val finalState = viewModel.state.first { it != LoadingState.Loading }
-        assertEquals(LoadingState.Success, finalState)
+        assertEquals(LoadingState.Success, viewModel.state.value)
     }
 
     @Test
@@ -50,10 +49,10 @@ class LoadingUserViewModelTest {
         coEvery { userRepository.download() } returns Result.failure(exception)
 
         val viewModel = LoadingUserViewModel(userRepository)
-        val finalState = viewModel.state.first { it != LoadingState.Loading }
 
-        assertTrue(finalState is LoadingState.Error)
-        assertEquals(exception.toString(), (finalState as LoadingState.Error).message)
+        val value = viewModel.state.value
+        assertTrue(value is LoadingState.Error)
+        assertEquals(exception.toString(), (value as LoadingState.Error).message)
     }
 
     @Test
@@ -61,13 +60,11 @@ class LoadingUserViewModelTest {
         coEvery { userRepository.download() } returns Result.failure(RuntimeException("Initial error"))
 
         val viewModel = LoadingUserViewModel(userRepository)
-        viewModel.state.first { it is LoadingState.Error }
 
         coEvery { userRepository.download() } returns Result.success(Unit)
 
         viewModel.download()
-        val finalState = viewModel.state.first { it is LoadingState.Success }
-        assertEquals(LoadingState.Success, finalState)
+        assertEquals(LoadingState.Success, viewModel.state.value)
     }
 
     @Test
@@ -78,13 +75,12 @@ class LoadingUserViewModelTest {
         coEvery { userRepository.download() } returns Result.failure(exception1)
 
         val viewModel = LoadingUserViewModel(userRepository)
-        viewModel.state.first { it is LoadingState.Error }
 
         coEvery { userRepository.download() } returns Result.failure(exception2)
         viewModel.download()
 
-        val finalState = viewModel.state.first { it is LoadingState.Error }
-        assertTrue(finalState is LoadingState.Error)
-        assertEquals(exception2.toString(), (finalState as LoadingState.Error).message)
+        val value = viewModel.state.value
+        assertTrue(value is LoadingState.Error)
+        assertEquals(exception2.toString(), (value as LoadingState.Error).message)
     }
 }
