@@ -44,15 +44,5 @@ internal fun NavController.onUserLoaded() {
 
 internal fun NavController.onEventLoaded() {
     popBackStack()
-    println("EVENT LOADED")
-    println("EVENT LOADED")
-    println("EVENT LOADED")
-    println("EVENT LOADED")
-    println("EVENT LOADED")
-    println("EVENT LOADED")
-    println("EVENT LOADED")
-    println("EVENT LOADED")
-    println("EVENT LOADED")
-    println("EVENT LOADED")
-    println("EVENT LOADED")
+    navigate(EventRoute)
 }

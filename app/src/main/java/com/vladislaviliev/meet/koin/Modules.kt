@@ -13,6 +13,7 @@ import com.vladislaviliev.meet.network.repositories.login.LoginRepositoryTimer
 import com.vladislaviliev.meet.network.repositories.user.UserRepository
 import com.vladislaviliev.meet.session.Session
 import com.vladislaviliev.meet.session.SessionRepository
+import com.vladislaviliev.meet.ui.event.EventViewModel
 import com.vladislaviliev.meet.ui.feed.FeedViewModel
 import com.vladislaviliev.meet.ui.loading.event.LoadingEventViewModel
 import com.vladislaviliev.meet.ui.loading.session.SessionViewModel
@@ -80,5 +81,6 @@ val appModule = module {
             )
         }
         scoped { LoadingEventViewModel(get<EventScopeRepository>().currentScope!!.get<EventRepository>()) }
+        scoped { EventViewModel(get<EventScopeRepository>().currentScope!!.get<EventRepository>()) }
     }
 }

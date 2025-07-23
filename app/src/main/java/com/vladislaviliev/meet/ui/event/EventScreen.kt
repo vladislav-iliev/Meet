@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +26,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vladislaviliev.meet.R
+import com.vladislaviliev.meet.event.EventScopeRepository
+import com.vladislaviliev.meet.network.repositories.event.Event
 import com.vladislaviliev.meet.ui.chips.big.BigChip
 import com.vladislaviliev.meet.ui.chips.big.BigChipParticipants
 import com.vladislaviliev.meet.ui.chips.big.bigChipData
@@ -35,6 +39,7 @@ import com.vladislaviliev.meet.ui.chips.small.SmallChip
 import com.vladislaviliev.meet.ui.chips.small.interestChipsData
 import com.vladislaviliev.meet.ui.chips.small.smallChipData
 import com.vladislaviliev.meet.ui.theme.MeetTheme
+import org.koin.compose.getKoin
 import org.openapitools.client.models.BaseLocation
 import org.openapitools.client.models.Currency
 import org.openapitools.client.models.Interest
@@ -44,11 +49,21 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 
 @Composable
-internal fun EventScreen(post: PostResponseDto, participantsPics: Iterable<String>, modifier: Modifier = Modifier) {
+internal fun EventScreen() {
+    val vm = getKoin()
+        .get<EventScopeRepository>()
+        .currentScope!!
+        .get<EventViewModel>()
+    val event by vm.repo.event.collectAsStateWithLifecycle()
+    EventScreen(event as Event.Success)
+}
+
+@Composable
+private fun EventScreen(event: Event.Success, modifier: Modifier = Modifier) {
     Surface(modifier) {
         Box {
             Column(Modifier.fillMaxSize()) {
-                ScrollableContent(post, participantsPics, Modifier.weight(1f))
+                ScrollableContent(event.postResponseDto, event.participants, Modifier.weight(1f))
                 EventBottomBar(Modifier.fillMaxWidth())
             }
             EventTopBar(Modifier.align(Alignment.TopCenter))
@@ -200,6 +215,6 @@ fun EventScreenFullPreview() {
         currentUserArrivalStatus = null
     )
     MeetTheme {
-        EventScreen(samplePost, listOf("", "", "", "", ""))
+        EventScreen(Event.Success(samplePost, listOf("", "", "", "", "")))
     }
 }
