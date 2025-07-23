@@ -7,7 +7,7 @@ import kotlinx.coroutines.withContext
 import org.openapitools.client.apis.UserControllerApi
 
 internal class UserRepository(
-    private val dispatcher: CoroutineDispatcher, private val api: UserControllerApi, val userId: String
+    private val dispatcher: CoroutineDispatcher, private val api: UserControllerApi, private val userId: String
 ) {
     private val _user = MutableStateFlow(User.BLANK)
     val user = _user.asStateFlow()
