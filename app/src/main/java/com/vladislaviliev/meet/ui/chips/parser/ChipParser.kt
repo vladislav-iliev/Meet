@@ -10,12 +10,15 @@ import org.openapitools.client.models.PostResponseDto
 
 internal class ChipParser {
 
+    private val iconParser = IconParser()
+    private val textParser = TextParser()
+
     @Composable
     internal fun smallChipData(type: OverviewChipType, post: PostResponseDto) =
         SmallChipData(
             icon(type, R.dimen.small_chip_icon),
             description(type, post),
-            TextParser().smallChipText(type, post)
+            textParser.smallChipText(type, post)
         )
 
     @Composable
@@ -37,15 +40,15 @@ internal class ChipParser {
 
     @Composable
     fun interestChipsData(post: PostResponseDto) =
-        post.interests.map { SmallChipData(IconParser().icon(it), it.name, it.name) }.toList()
+        post.interests.map { SmallChipData(iconParser.icon(it), it.name, it.name) }.toList()
 
     @Composable
     fun bigChipData(type: OverviewChipType, post: PostResponseDto) =
-        BigChipData(icon(type, R.dimen.big_chip_icon), TextParser().bigChipText(type, post), description(type, post))
+        BigChipData(icon(type, R.dimen.big_chip_icon), textParser.bigChipText(type, post), description(type, post))
 
     @Composable
-    fun icon(type: OverviewChipType, @DimenRes size: Int) = IconParser().icon(type, size)
+    fun icon(type: OverviewChipType, @DimenRes size: Int) = iconParser.icon(type, size)
 
     @Composable
-    fun description(type: OverviewChipType, post: PostResponseDto) = TextParser().description(type, post)
+    fun description(type: OverviewChipType, post: PostResponseDto) = textParser.description(type, post)
 }
