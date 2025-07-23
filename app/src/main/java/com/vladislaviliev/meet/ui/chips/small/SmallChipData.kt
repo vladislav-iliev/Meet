@@ -14,12 +14,17 @@ internal fun PostResponseDto.smallChipData(type: OverviewChipType) =
     SmallChipData(type.icon(), type.iconDescription(), overviewChipText(type))
 
 @Composable
-internal fun PostResponseDto.smallChipsData() = listOf(
-    smallChipData(OverviewChipType.Payment),
-    smallChipData(OverviewChipType.Date),
-    smallChipData(OverviewChipType.Time),
-    smallChipData(OverviewChipType.Participants),
-    smallChipData(OverviewChipType.Location),
-    smallChipData(OverviewChipType.Accessibility),
-    smallChipData(OverviewChipType.ConfirmLocation)
-)
+internal fun PostResponseDto.smallChipsData(): List<SmallChipData> {
+    val list = mutableListOf(
+        smallChipData(OverviewChipType.Payment),
+        smallChipData(OverviewChipType.Participants),
+        smallChipData(OverviewChipType.Location),
+        smallChipData(OverviewChipType.Accessibility),
+        smallChipData(OverviewChipType.ConfirmLocation)
+    )
+    if (this.fromDate != null) {
+        list.add(1, smallChipData(OverviewChipType.Date))
+        list.add(2, smallChipData(OverviewChipType.Time))
+    }
+    return list
+}
