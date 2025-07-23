@@ -37,10 +37,10 @@ private fun BigChip(
     }
 
     if (outlined) {
-        Card(modifier.fillMaxWidth()) { contents() }
+        OutlinedCard({}, modifier.fillMaxWidth()) { contents() }
         return
     }
-    OutlinedCard({}, modifier.fillMaxWidth()) { contents() }
+    Card(modifier.fillMaxWidth()) { contents() }
 }
 
 @Composable
