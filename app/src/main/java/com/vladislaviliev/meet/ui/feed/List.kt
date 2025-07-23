@@ -36,7 +36,7 @@ internal fun ColumnScope.FeedList(
             .weight(1f)
             .fillMaxWidth(),
         contentPadding = PaddingValues(dimensionResource(R.dimen.feed_list_padding)),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.feed_list_padding)),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         observeState(items.loadState.prepend, onRetryClick)
