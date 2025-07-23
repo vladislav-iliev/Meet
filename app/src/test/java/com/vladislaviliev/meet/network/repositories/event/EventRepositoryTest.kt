@@ -19,7 +19,6 @@ import org.openapitools.client.models.MiniUser
 import org.openapitools.client.models.PostResponseDto
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
